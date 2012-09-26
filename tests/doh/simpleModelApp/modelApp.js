@@ -1,5 +1,6 @@
-require(["dojo/_base/window","dojox/app/main", "dojox/json/ref", "dojox/app/utils/configUtils", "dojo/text!./config.json", "dojo/sniff"],
-function(win, Application, jsonRef, configUtils, config, has){
+require(["dojo/_base/window","dojo/_base/lang","dojo/_base/declare","dojox/app/main", "dojox/app/utils/configUtils", "dojox/json/ref", 
+		"dojo/text!../../simpleModelApp/config.json", "dojo/text!./configMerge.json", "dojo/sniff"],
+function(win, lang, declare, Application, configUtils, jsonRef, config1, configMerge, has){
 	win.global.modelApp = {};
 	modelApp.names = {
 		identifier: "id",
@@ -70,13 +71,12 @@ function(win, Application, jsonRef, configUtils, config, has){
 		"Tel": "408-764-1234",
 		"Fax": "408-764-4321"
 	}];
-	var config = jsonRef.fromJson(config);
-	// on IE use the HistoryHash controller instead of the History controller.
 
+	var config = configUtils.configMerge(jsonRef.fromJson(config1), jsonRef.fromJson(configMerge));
+	// on IE use the HistoryHash controller instead of the History controller.
 	//config.controllers[0] = has("ie") ? "dojox/app/controllers/HistoryHash" : "dojox/app/controllers/History";		
 	config = has("ie") ? configUtils.configMerge(config,{"controllers": ["dojox/app/controllers/HistoryHash"]}) : 
 						configUtils.configMerge(config,{"controllers": ["dojox/app/controllers/History"]})		
-	//console.log("config.controllers[0]="+config.controllers[0]);
 	Application(config);
 
 });

@@ -1,0 +1,44 @@
+{
+	"views": {
+
+		"home": {
+			"definition" : "none",
+			"template": "../app/tests/simpleModelApp/templates/main.html"
+		},
+
+		"simple":{
+			"definition" : "../app/tests/simpleModelApp/views/simple.js",
+			"template": "../app/tests/simpleModelApp/templates/simple.html"
+		},
+
+		"simple2":{
+			"definition" : "../app/tests/simpleModelApp/views/simple2.js",
+			"template": "../app/tests/simpleModelApp/templates/simple2.html"
+		},
+
+		"simple3":{
+			"definition" : "../app/tests/simpleModelApp/views/simple3.js",
+			"template": "../app/tests/simpleModelApp/templates/simple3.html"
+		},
+
+		"repeat": {
+			"template": "../app/tests/simpleModelApp/templates/repeat.html",
+			"definition" : "../app/tests/simpleModelApp/views/repeat.js"
+		},
+
+		"repeat2": {
+			"template": "../app/tests/simpleModelApp/templates/repeat2.html",
+			"definition" : "../app/tests/simpleModelApp/views/repeat2.js"
+		},
+
+		"repeat3": {
+			"template": "../app/tests/simpleModelApp/templates/repeat3.html",
+			"definition" : "../app/tests/simpleModelApp/views/repeat3.js"
+		},
+
+		"generate": {
+			"template": "../app/tests/simpleModelApp/templates/generate.html",
+			"definition" : "../app/tests/simpleModelApp/views/generate.js"
+		}
+	}
+}
