@@ -1,15 +1,15 @@
 define(["dojo/_base/declare", "dojo/dom", "dojo/dom-style",
 		"dojo/dom-class", "dojo/dom-attr", "dojo/dom-construct", 
-		"./LayoutBase", "dijit/registry"],
+		"dojox/app/controllers/LayoutBase", "dijit/registry"],
 function(declare, dom, domStyle, domClass, domAttr, domConstruct, LayoutBase, registry){
 	// module:
-	//		dojox/app/controllers/CssLayout
+	//		dojox/app/tests/mediaQueryLayoutApp/controllers/CssLayout
 	// summary:
 	//		Will layout an application with a BorderContainer.  
 	//		Each view to be shown in a region of the BorderContainer will be wrapped in a StackContainer and a ContentPane.
 	//		
 
-	return declare("dojox.app.controllers.CssLayout", LayoutBase, {
+	return declare("dojox/app/tests/mediaQueryLayoutApp/controllers/CssLayout", LayoutBase, {
 
 		initLayout: function(event){
 			// summary:

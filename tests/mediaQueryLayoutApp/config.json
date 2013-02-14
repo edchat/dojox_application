@@ -36,7 +36,7 @@
 		"dojox/app/controllers/History",
 		"dojox/app/controllers/Load",
 		"dojox/app/controllers/Transition",
-		"dojox/app/controllers/CssLayout"
+		"dojox/app/tests/mediaQueryLayoutApp/controllers/CssLayout"
 	],
 
 	//stores we are using
@@ -76,7 +76,7 @@
 
 
 	//the name of the view to load when the app is initialized.
-	"defaultView": "header+navigation+simple",
+	"defaultView": "header+navigation+TestInfo",
 
 	// these are the possilbe defaultTransitions
 	"defaultTransition": "slide",
@@ -90,6 +90,11 @@
 			"constraint" : "left",
 			"template": "mediaQueryLayoutApp/templates/navigation.html"
 		},
+		"TestInfo": {
+			"definition" : "mediaQueryLayoutApp/views/TestInfo.js",
+			"constraint" : "center",
+			"template": "mediaQueryLayoutApp/templates/TestInfo.html"
+		},	
 		"centerNavigation":{
 			"definition" : "mediaQueryLayoutApp/views/centerNavigation.js",
 			"constraint" : "center",
