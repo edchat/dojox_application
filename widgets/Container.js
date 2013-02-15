@@ -74,6 +74,9 @@ function(declare, lang, registry, domAttr, domGeom, domStyle, WidgetBase, Contai
 			//		changeSize is specified).  If caller knows this size and
 			//		passes it in, we don't need to query the browser to get the size.
 			//	|	{w: int, h: int}
+			if(this.scrollable){
+				this.inherited(arguments);
+			}
 
 			var node = this.domNode;
 
