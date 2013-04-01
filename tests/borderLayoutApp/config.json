@@ -42,6 +42,7 @@
 	],
 
 	"borderLayoutNoSplitter": false,  // set true to turn off the splitter on the StackContainer.
+	"autoHashUrl": true,
 
 	// these are the possible defaultTransitions, 
 	// the defaultTransition is only used if transition is not set in the config and it is not set or defaulted on the transitionEvent

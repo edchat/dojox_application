@@ -179,6 +179,7 @@ define(["require", "dojo/_base/kernel", "dojo/_base/lang", "dojo/_base/declare",
 			// create application controller instance
 			// move set _startView operation from history module to application
 			var currentHash = window.location.hash;
+			
 		//	this._startView = (((currentHash && currentHash.charAt(0) == "#") ? currentHash.substr(1) : currentHash) || this.defaultView).split('&')[0];
 			this._startView = hash.getTarget(currentHash, this.defaultView);
 			this._startParams = hash.getParams(currentHash);
@@ -197,11 +198,19 @@ define(["require", "dojo/_base/kernel", "dojo/_base/lang", "dojo/_base/declare",
 			}
 			var emitLoad = function(){
 				// emit "app-load" event and let controller to load view.
+				var startView = this.defaultView;
+				if(this.autoHashUrl){
+					startView = this._startView;
+				}
 				this.emit("app-load", {
-					viewId: this.defaultView,
+					viewId: startView,
 					params: this._startParams,
 					callback: lang.hitch(this, function (){
-						var parts = this.defaultView.split('+'), selectId, constraint;
+						var startView = this.defaultView;
+						if(this.autoHashUrl){
+							startView = this._startView;
+						}
+						var parts = startView.split('+'), selectId, constraint;
 						// TODO all this code should be moved to a controller, there is no reason to do that here
 						// for initial view and somewhere else for the rest
 						if(parts.length > 0){		
@@ -216,7 +225,7 @@ define(["require", "dojo/_base/kernel", "dojo/_base/lang", "dojo/_base/declare",
 								constraints.setSelectedChild(this, constraint, this.children[this.id + '_' + selectId]);
 							}
 						}else{
-							var selectId = this.defaultView.split(",").shift();
+							var selectId = startView.split(",").shift();
 							// set the constraint
 							if(!this.children[this.id + "_" + selectId].hasOwnProperty("constraint")){
 								this.children[this.id + '_' + selectId].constraint = domAttr.get(this.children[this.id + '_' + selectId].domNode, "data-app-constraint") || "center";

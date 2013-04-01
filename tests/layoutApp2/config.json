@@ -85,6 +85,7 @@
 
 	//the name of the view to load when the app is initialized.
 	"defaultView": "navigation+simple",
+	"autoHashUrl": true,
 
 	// these are the possilbe defaultTransitions
 	//"defaultTransition": "slide",

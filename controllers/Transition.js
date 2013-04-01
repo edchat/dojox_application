@@ -65,6 +65,9 @@ define(["require", "dojo/_base/lang", "dojo/_base/declare", "dojo/has", "dojo/on
 						var remViewId = removeParts.shift();
 						var newEvent = lang.clone(event);
 						newEvent.viewId = remViewId;
+						if(viewId.length <= 0){  // only removing a view
+							newEvent._doResize = true; // at the end of the last transition call resize
+						}
 						this._doTransition(newEvent.viewId, newEvent.opts, newEvent.opts.params, event.opts.data, this.app, true, newEvent._doResize);
 					}
 				}
@@ -286,6 +289,11 @@ define(["require", "dojo/_base/lang", "dojo/_base/declare", "dojo/has", "dojo/on
 			if(!next){
 				if(removeView){
 					this.app.log("> in Transition._doTransition called with removeView true, but that view is not available to remove");
+					// elc try this here
+					if(doResize){
+						this.app.log("  > in Transition._doTransition calling app-finishedTransition");
+						this.app.emit("app-finishedTransition"); // transition done...after last layoutView fire app-finishedTransition			
+					}
 					return;	// trying to remove a view which is not showing
 				}
 				throw Error("child view must be loaded before transition.");
@@ -350,6 +358,7 @@ define(["require", "dojo/_base/lang", "dojo/_base/declare", "dojo/has", "dojo/on
 					this.app.emit("app-layoutView", {"parent": parent, "view": next });
 				}
 				if(doResize && !subIds){
+					this.app.log("> in Transition._doTransition calling app.emit app-resize");
 					this.app.emit("app-resize"); // after last layoutView fire app-resize			
 				}
 				
@@ -374,6 +383,7 @@ define(["require", "dojo/_base/lang", "dojo/_base/declare", "dojo/has", "dojo/on
 						this.app.log("    < in Transition._doTransition back from transit for next ="+next.name);
 					}
 					if(removeView){
+						this.app.log("  > in Transition._doTransition calling app-layoutView");
 						this.app.emit("app-layoutView", {"parent": parent, "view": current, "removeView": true});
 					}
 
@@ -397,7 +407,14 @@ define(["require", "dojo/_base/lang", "dojo/_base/declare", "dojo/has", "dojo/on
 					}
 
 					if(subIds){
+						this.app.log("  > in Transition._doTransition calling _doTransition for subIds");
 						this._doTransition(subIds, opts, params, data, next || parent, removeView, doResize, true);
+					}else{
+						// elc try this here
+						if(doResize){
+							this.app.log("  > in Transition._doTransition calling app-finishedTransition");
+							this.app.emit("app-finishedTransition"); // transition done after last layoutView fire app-finishedTransition
+						}			
 					}
 				}));
 				return result; // dojo/promise/all
@@ -418,12 +435,15 @@ define(["require", "dojo/_base/lang", "dojo/_base/declare", "dojo/has", "dojo/on
 			this.app.log("> in Transition._doTransition calling app.triggger layoutView view next name=[",next.name,"], removeView = [",removeView,"], parent.name=[",next.parent.name,"], next==current path");
 			this.app.emit("app-layoutView", {"parent":parent, "view": next, "removeView": removeView});
 			if(doResize && !subIds){
+				this.app.log("  > in Transition._doTransition calling app-resize and app-finishedTransition");
 				this.app.emit("app-resize"); // after last layoutView fire app-resize
+				this.app.emit("app-finishedTransition"); // after last layoutView fire app-finishedTransition
 			}
 
 			// do sub transition like transition from "tabScene,tab1" to "tabScene,tab2"
 			if(subIds){
-				return this._doTransition(subIds, opts, params, data, next, removeView); //dojo.DeferredList
+				this.app.log("  > in Transition._doTransition calling _doTransition for subIds");
+				return this._doTransition(subIds, opts, params, data, next, removeView, doResize, true); //dojo.DeferredList
 			}
 		}
 	});

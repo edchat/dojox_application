@@ -19,7 +19,8 @@ function(lang, declare, on, Controller, hash){
 			//		dojox/app application instance.
 
 			this.events = {
-				"app-domNode": this.onDomNodeChange
+				"app-domNode": this.onDomNodeChange,
+				"app-finishedTransition": this.setupUrlHash
 			};
 			if(this.app.domNode){
 				this.onDomNodeChange({oldNode: null, newNode: this.app.domNode});
@@ -30,8 +31,11 @@ function(lang, declare, on, Controller, hash){
 		onDomNodeChange: function(evt){
 			if(evt.oldNode != null){
 				this.unbind(evt.oldNode, "startTransition");
+	//			this.unbind(evt.oldNode, "app-resize");
 			}
 			this.bind(evt.newNode, "startTransition", lang.hitch(this, this.onStartTransition));
+	//		this.bind(evt.newNode, "app-resize", lang.hitch(this, this.onStartTransition));
+			
 		},
 
 		onStartTransition: function(evt){
@@ -52,6 +56,7 @@ function(lang, declare, on, Controller, hash){
 			//		transition options parameter
 
 			// bubbling "startTransition", so Transition controller can response to it.
+			this.app.log("> in History onStartTransition evt.detail.target=["+evt.detail.target+"]");
 
 			var target = evt.detail.target;
 			var regex = /#(.+)/;
@@ -59,13 +64,54 @@ function(lang, declare, on, Controller, hash){
 				target = evt.detail.href.match(regex)[1];
 			}
 			
+			if(!this.app.autoHashUrl){
+				// create url hash from target if it is not set
+				var currentHash = evt.detail.url || "#"+evt.detail.target;
+				if(evt.detail.params){
+					currentHash = hash.buildWithParams(currentHash, evt.detail.params);
+				}
+				// push states to history list
+				history.pushState(evt.detail, evt.detail.href, currentHash);
+			}else{
+				this.app.currentParams = evt.detail.params;
+				this.app.currentDetail = evt.detail;
+				this.app.currentDetailHref = evt.detail.href;
+			}	
+		},
+
+		setupUrlHash: function(evt){
+			// summary:
+			//		Response to dojox/app "startTransition" event.
+			//
+			// example:
+			//		Use "dojox/mobile/TransitionEvent" to trigger "startTransition" event, and this function will response the event. For example:
+			//		|	var transOpts = {
+			//		|		title:"List",
+			//		|		target:"items,list",
+			//		|		url: "#items,list",
+			//		|		params: {"param1":"p1value"}
+			//		|	};
+			//		|	new TransitionEvent(domNode, transOpts, e).dispatch();
+			//
+			// evt: Object
+			//		transition options parameter
+			
 			// create url hash from target if it is not set
-			var currentHash = evt.detail.url || "#"+evt.detail.target;
-			if(evt.detail.params){
-				currentHash = hash.buildWithParams(currentHash, evt.detail.params);
+			if(this.app.doingPopState){ // when doingPopState do not pushState.
+				this.app.doingPopState = false;
+				return;	
 			}
-			// push states to history list
-			history.pushState(evt.detail, evt.detail.href, currentHash);
+			if(this.app.autoHashUrl){
+				var currentHash = "#"+hash.getAllSelectedChildrenHash(this.app, "");
+				this.app.log("> in History setupUrlHash currentHash=["+currentHash+"]");
+			
+				if(this.app.currentParams){
+					currentHash = hash.buildWithParams(currentHash, this.app.currentParams);
+				}
+						
+				// push states to history list
+				history.pushState(this.app.currentDetail, this.app.currentDetailHref, currentHash);
+			}
 		},
 
 		onPopState: function(evt){
@@ -81,6 +127,7 @@ function(lang, declare, on, Controller, hash){
 			if(this.app.getStatus() !== this.app.lifecycle.STARTED){
 				return;
 			}
+			this.app.doingPopState = true;
 
 			var state = evt.state;
 			if(!state){
@@ -90,18 +137,22 @@ function(lang, declare, on, Controller, hash){
 						url: location.hash,
 						params: hash.getParams(location.hash)
 					}
+					this.app.log("> in History onPopState state.target=["+state.target+"]");
 				}else{
+					this.app.log("> in History onPopState this.app.defaultView=["+this.app.defaultView+"]");
 					state = {
 						target: this.app.defaultView
 					};
 				}
 			}
+			this.app.log("> in History onPopState state.target=["+state.target+"]");
 
 			// TODO explain what is the purpose of this, _sim is never set in dojox/app
 			if(evt._sim){
 				history.replaceState(state, state.title, state.href);
 			}
 
+			this.app.log("> in History onPopState state.target=["+state.target+"]");
 			// transition to the target view
 			this.app.emit("app-transition", {
 				viewId: state.target,

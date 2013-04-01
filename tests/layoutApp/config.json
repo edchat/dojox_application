@@ -79,6 +79,7 @@
 			]
 		}
 	},	
+	"autoHashUrl": true,
 
 	"template": "layoutApp/views/navigation.html",
 
