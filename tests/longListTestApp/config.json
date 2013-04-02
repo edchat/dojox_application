@@ -72,6 +72,7 @@
 			]
 		}
 	},	
+	"autoHashUrl": true, // auto generate the url hash
 
 	// these are the possible transitions, 
 	// if a transition is set on a view or parent it will override the transition set on the transitionEvent or the defaultTransition in the config.

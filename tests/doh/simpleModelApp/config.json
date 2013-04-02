@@ -97,6 +97,7 @@
 
 	//the name of the scene to load when the app is initialized.
 	"defaultView": "home",
+	"autoHashUrl": true, // auto generate the url hash
 
 	"defaultTransition": "slide",
 	//scenes are groups of views and models loaded at once	

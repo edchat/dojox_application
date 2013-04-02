@@ -292,7 +292,7 @@ define(["require", "dojo/_base/lang", "dojo/_base/declare", "dojo/has", "dojo/on
 					// elc try this here
 					if(doResize){
 						this.app.log("  > in Transition._doTransition calling app-finishedTransition");
-						this.app.emit("app-finishedTransition"); // transition done...after last layoutView fire app-finishedTransition			
+						this.app.emit("app-finishedTransition", {"opts":opts}); // transition done...after last layoutView fire app-finishedTransition			
 					}
 					return;	// trying to remove a view which is not showing
 				}
@@ -412,8 +412,8 @@ define(["require", "dojo/_base/lang", "dojo/_base/declare", "dojo/has", "dojo/on
 					}else{
 						// elc try this here
 						if(doResize){
-							this.app.log("  > in Transition._doTransition calling app-finishedTransition");
-							this.app.emit("app-finishedTransition"); // transition done after last layoutView fire app-finishedTransition
+							this.app.log("  > in Transition._doTransition calling app-finishedTransition next name=[",next.name,"], parent.name=[",next.parent.name,"]");
+							this.app.emit("app-finishedTransition", {"opts":opts}); // transition done after last layoutView fire app-finishedTransition
 						}			
 					}
 				}));
@@ -435,9 +435,9 @@ define(["require", "dojo/_base/lang", "dojo/_base/declare", "dojo/has", "dojo/on
 			this.app.log("> in Transition._doTransition calling app.triggger layoutView view next name=[",next.name,"], removeView = [",removeView,"], parent.name=[",next.parent.name,"], next==current path");
 			this.app.emit("app-layoutView", {"parent":parent, "view": next, "removeView": removeView});
 			if(doResize && !subIds){
-				this.app.log("  > in Transition._doTransition calling app-resize and app-finishedTransition");
+				this.app.log("  > in Transition._doTransition calling app-resize and app-finishedTransition next name=[",next.name,"], parent.name=[",next.parent.name,"]");
 				this.app.emit("app-resize"); // after last layoutView fire app-resize
-				this.app.emit("app-finishedTransition"); // after last layoutView fire app-finishedTransition
+				this.app.emit("app-finishedTransition", {"opts":opts}); // after last layoutView fire app-finishedTransition
 			}
 
 			// do sub transition like transition from "tabScene,tab1" to "tabScene,tab2"

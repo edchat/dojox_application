@@ -58,6 +58,7 @@
 			"defaultView": "navLeft+mainCenter+lastRight",
 		}
 	},	
+	"autoHashUrl": true, // auto generate the url hash
 
 
 	// these are the possilbe defaultTransitions

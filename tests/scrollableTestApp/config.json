@@ -108,6 +108,7 @@
 			]
 		}
 	},	
+	"autoHashUrl": true, // auto generate the url hash
 
 	// defaultTransition: The default animation type for the view transition.
 	// the defaultTransition is only used if transition is not set in the config and the transition is not set or 

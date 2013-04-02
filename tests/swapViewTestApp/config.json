@@ -100,7 +100,9 @@
 	//"defaultView": "header+navigation+TestInfo",
 	"defaultView": "main+header+TestInfo+simple+repeatList+navigation",
 	//"defaultView": "main+navigation+TestInfo+simple+repeatList",
-	
+
+	"autoHashUrl": true, // auto generate the url hash
+
 
 	// these are the possilbe defaultTransitions
 	"defaultTransition": "slide",

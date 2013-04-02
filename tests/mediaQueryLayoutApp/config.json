@@ -69,6 +69,7 @@
 			]
 		}
 	},	
+	"autoHashUrl": true, // auto generate the url hash
 
 	//the name of the view to load when the app is initialized.
 	"defaultView": "header+navigation+TestInfo",
