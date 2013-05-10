@@ -78,17 +78,21 @@
 			//all views in the second scene will be bound to the user model
 			"models": [],
 			"template": "./tabScene.html",
-			"defaultView": "tab1",
-			"defaultTransition": "flip",
+			"controller": "./tabScene.js",
+		//	"defaultView": "tab1",
+			"defaultTransition": "slide",
 			//the views available to this scene
 			"views": { 
 				"tab1":{
+					"transition": "none",
 					"template": "./templates/tabs/tab1.html"
 				},
 				"tab2":{
+					"transition": "none",
 					"template": "./templates/tabs/tab2.html"
 				},
 				"tab3":{
+					"transition": "none",
 					"template": "./templates/tabs/tab3.html"
 				}
 			},
