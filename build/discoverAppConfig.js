@@ -4,8 +4,9 @@ define([
 	"build/buildControl",
 	"build/messages",
 	"build/process",
-	"dojox/json/ref"
-], function(argv, fs, bc, messages, process, json){
+	"dojox/json/ref",
+	"../utils/config"
+], function(argv, fs, bc, messages, process, json , configUtils){
 	var parseViews = function(mids, mainLayer, views, params){
 		for(var key in views){
 			// ignore naming starting with _ (jsonref adding is own stuff in there)
@@ -55,6 +56,9 @@ define([
 			console.log(e);
 		}
 		if(config){
+			// process the staticHasFeatures for the config with the call to configBuildProcessHas
+			// and use the processed config to add the app dependencies, controllers, modules etc.
+			config = configUtils.configBuildProcessHas(config, bc.staticHasFeatures);
 			var mids = [], params = {};
 			if(config.loaderConfig){
 				require(config.loaderConfig);
