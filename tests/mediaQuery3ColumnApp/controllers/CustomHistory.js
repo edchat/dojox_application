@@ -9,7 +9,7 @@ function(lang, declare, on, Controller, hash, topic){
 	//		Using dojox/app/controllers/History means you can use the browser back/forward buttons to retrace all of your
 	// 		steps even if, for example if you select "Main Option 1" multiple times.
 	//
-	//		Using CustomHistory without setting customHistoryStackKey in the config means it will check to see if the current hash
+	//		Using CustomHistory without setting customHistoryStackKey in the config means it will check to see if the current url
 	// 		has been used already, and if it has it will remove the things from the history stack back to the point it was
 	// 		last used.  So for example if you start the application in a new tab, and select "Main Option 1", then
 	// 		you select other options, (like "Main Option 2" and "Main Option 3") and then select
@@ -24,7 +24,7 @@ function(lang, declare, on, Controller, hash, topic){
 	// 		back to the initial default page instead of the last thing before you last went to "Main Option 1".
 	// 		The difference caused by using "target" can be seen when selecting "Last Option 1", 2 or 3, and then using the
 	//		browser back button, when using "target" you will not go back through those selections, but without "target"
-	//		you will go through those options because those options are set in the hash, but not in the target.
+	//		you will go through those options because those options are set in the url, but not in the target.
 
 	//		Bind "app-domNode" event on dojox/app application instance.
 	//		Bind "startTransition" event on dojox/app application domNode.
@@ -48,7 +48,7 @@ function(lang, declare, on, Controller, hash, topic){
 
 		// currentStackKey: string
 		//              boolean is true when the currentStack is being updated because the view target was already in the stack
-		currentStackKey: "hash",  // set "customHistoryStackKey" : "target" in the config if you want to key off of the target instead of the hash
+		currentStackKey: "url",  // set "customHistoryStackKey" : "target" in the config if you want to key off of the target instead of the url
 
 		// currentStackUpdating: boolean
 		//              boolean is true when the currentStack is being updated because the view target was already in the stack
@@ -117,14 +117,14 @@ function(lang, declare, on, Controller, hash, topic){
 			// Create a new "current state" history entry
 			this._currentPosition += 1;
 
-			var newHash = evt.detail.url || "#" + evt.detail.target; // move up above
+			var newUrl = evt.detail.url || "#" + evt.detail.target; // move up above
 
 			if(evt.detail.params){
-				newHash = hash.buildWithParams(newHash, evt.detail.params);
+				newUrl = hash.buildWithParams(newUrl, evt.detail.params);
 			}
 
 			//check to see if the hash or target based upon currentStackKey is already in the list
-			var testStackKey = this.currentStackKey == "target" ? evt.detail.target : newHash;
+			var testStackKey = this.currentStackKey == "target" ? evt.detail.target : newUrl;
 			var idx = this.currentStack.indexOf(testStackKey);
 			if(idx > -1){  // the target is in the list
 				// found the target in the list, so backup to that entry
@@ -139,12 +139,12 @@ function(lang, declare, on, Controller, hash, topic){
 
 			evt.detail.id = this._currentPosition;
 			evt.detail.fwdTransition = evt.detail.transition;
-			history.pushState(evt.detail, evt.detail.href, newHash);
+			history.pushState(evt.detail, evt.detail.href, newUrl);
 
 			if(this.currentStackKey == "target"){
 				this.currentStack.push(evt.detail.target);
 			}else{
-				this.currentStack.push(newHash);
+				this.currentStack.push(newUrl);
 			}
 
 			this.currentState = lang.clone(evt.detail);
