@@ -46,9 +46,30 @@
 		},
 		"!ie9orLess" : {
 			"controllers": [
+			//	Using History means you can use the browser back/forward buttons to retrace all of your steps even if,
+			// 	for example if you select "Main Option 1" multiple times.
+			//
+			//	Using CustomHistory without setting customHistoryStackKey means it will check to see if the current hash has
+			// 	been used already, and if it has it will remove the things from the history stack back to the point it was
+			// 	last used.  So for example if you start the application in a new tab, and select "Main Option 1", then
+			// 	you select other options, (like "Main Option 2" and "Main Option 3") and then select
+			// 	"Main Option 1" again, doing a browser back after selecting "Main Option 1" the last time will take you
+			// 	back to the initial default page instead of the last thing before you last went to "Main Option 1".
+			//
+			//	Using CustomHistory and setting customHistoryStackKey to "target" means it will check to see if the current target
+			// 	has been used already, and if it has it will remove the things from the history stack back to the point it was
+			// 	last used.  So for example if you start the application in a new tab, and select "Main Option 1", then
+			// 	you select other options, (like "Main Option 2" and "Main Option 3") and then select
+			// 	"Main Option 1" again, doing a browser back after selecting "Main Option 1" the last time will take you
+			// 	back to the initial default page instead of the last thing before you last went to "Main Option 1".
+			// 	The difference caused by using "target" can be seen when selecting "Last Option 1", 2 or 3, and then using the
+			//	browser back button, when using "target" you will not go back through those selections, but without "target"
+			//	you will go through those options because those options are set in the hash, but not in the target.
+
 			//	"dojox/app/controllers/History"
 				"dojox/app/tests/mediaQuery3ColumnApp/controllers/CustomHistory"
 			]
+			//,"customHistoryStackKey" : "target"  // use this to test with target, hash is the default
 		},
 		"isInitiallySmall" : {
 			//the name of the view to load when the app is initialized.

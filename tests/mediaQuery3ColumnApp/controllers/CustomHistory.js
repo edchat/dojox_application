@@ -5,6 +5,27 @@ function(lang, declare, on, Controller, hash, topic){
 	// summary:
 	//		This CustomHistory controller will manage the history stack so that if you return to a view target which
 	//		is in the history stack already, it will update the history stack to go to that previous view in the stack.
+
+	//		Using dojox/app/controllers/History means you can use the browser back/forward buttons to retrace all of your
+	// 		steps even if, for example if you select "Main Option 1" multiple times.
+	//
+	//		Using CustomHistory without setting customHistoryStackKey in the config means it will check to see if the current hash
+	// 		has been used already, and if it has it will remove the things from the history stack back to the point it was
+	// 		last used.  So for example if you start the application in a new tab, and select "Main Option 1", then
+	// 		you select other options, (like "Main Option 2" and "Main Option 3") and then select
+	// 		"Main Option 1" again, doing a browser back after selecting "Main Option 1" the last time will take you
+	// 		back to the initial default page instead of the last thing before you last went to "Main Option 1".
+	//
+	//		Using CustomHistory and setting customHistoryStackKey to "target" in the config means it will check to see if the
+	// 		current target has been used already, and if it has it will remove the things from the history stack back to the
+	// 		point it was last used.  So for example if you start the application in a new tab, and select "Main Option 1", then
+	// 		you select other options, (like "Main Option 2" and "Main Option 3") and then select
+	// 		"Main Option 1" again, doing a browser back after selecting "Main Option 1" the last time will take you
+	// 		back to the initial default page instead of the last thing before you last went to "Main Option 1".
+	// 		The difference caused by using "target" can be seen when selecting "Last Option 1", 2 or 3, and then using the
+	//		browser back button, when using "target" you will not go back through those selections, but without "target"
+	//		you will go through those options because those options are set in the hash, but not in the target.
+
 	//		Bind "app-domNode" event on dojox/app application instance.
 	//		Bind "startTransition" event on dojox/app application domNode.
 	//		Bind "popstate" event on window object.
@@ -24,6 +45,11 @@ function(lang, declare, on, Controller, hash, topic){
 		// currentStack: Array
 		//              Array with the history used to look for targets already in the stack
 		currentStack: [],
+
+		// currentStackKey: string
+		//              boolean is true when the currentStack is being updated because the view target was already in the stack
+		currentStackKey: "hash",  // set "customHistoryStackKey" : "target" in the config if you want to key off of the target instead of the hash
+
 		// currentStackUpdating: boolean
 		//              boolean is true when the currentStack is being updated because the view target was already in the stack
 		currentStackUpdating: false,
@@ -42,6 +68,8 @@ function(lang, declare, on, Controller, hash, topic){
 				this.onDomNodeChange({oldNode: null, newNode: this.app.domNode});
 			}
 			this.bind(window, "popstate", lang.hitch(this, this.onPopState));
+
+			this.currentStackKey = this.app.customHistoryStackKey || this.currentStackKey;
 		},
 
 		onDomNodeChange: function(evt){
@@ -89,15 +117,15 @@ function(lang, declare, on, Controller, hash, topic){
 			// Create a new "current state" history entry
 			this._currentPosition += 1;
 
-			var newHash = evt.detail.url || "#" + evt.detail.target;
+			var newHash = evt.detail.url || "#" + evt.detail.target; // move up above
 
 			if(evt.detail.params){
 				newHash = hash.buildWithParams(newHash, evt.detail.params);
 			}
 
-			//check to see if the target is already in the list
-			// TODO: do I need to reset the _currentPosition here?
-			var idx = this.currentStack.indexOf(evt.detail.target);
+			//check to see if the hash or target based upon currentStackKey is already in the list
+			var testStackKey = this.currentStackKey == "target" ? evt.detail.target : newHash;
+			var idx = this.currentStack.indexOf(testStackKey);
 			if(idx > -1){  // the target is in the list
 				// found the target in the list, so backup to that entry
 				this.currentStackUpdating = true;
@@ -112,7 +140,13 @@ function(lang, declare, on, Controller, hash, topic){
 			evt.detail.id = this._currentPosition;
 			evt.detail.fwdTransition = evt.detail.transition;
 			history.pushState(evt.detail, evt.detail.href, newHash);
-			this.currentStack.push(evt.detail.target);
+
+			if(this.currentStackKey == "target"){
+				this.currentStack.push(evt.detail.target);
+			}else{
+				this.currentStack.push(newHash);
+			}
+
 			this.currentState = lang.clone(evt.detail);
 
 			// Finally: Publish pushState topic
@@ -142,7 +176,11 @@ function(lang, declare, on, Controller, hash, topic){
 			if(backward){
 				this.currentStack.pop(); // keep currentStack up to date
 			}else{
-				this.currentStack.push(evt.state.target);
+				if(this.currentStackKey == "target"){
+					this.currentStack.push(evt.state.target);
+				}else{
+					this.currentStack.push(evt.state.url);
+				}
 			}
 
 			// Publish popState topic and transition to the target view. Important: Use correct transition.
