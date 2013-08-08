@@ -46,7 +46,8 @@
 		},
 		"!ie9orLess" : {
 			"controllers": [
-				"dojox/app/controllers/History"
+			//	"dojox/app/controllers/History"
+				"dojox/app/tests/mediaQuery3ColumnApp/controllers/CustomHistory"
 			]
 		},
 		"isInitiallySmall" : {
