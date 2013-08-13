@@ -34,6 +34,7 @@
 		"dojox/app/controllers/Transition",
 		"dojox/app/tests/mediaQuery3ColumnApp/controllers/CssLayout",
 		"dojox/app/tests/mediaQuery3ColumnApp/controllers/NavigationController"
+		,"dojox/app/tests/mediaQuery3ColumnApp/controllers/LogAllAppEvents"
 	],
 
 	// The has section will include the sections for which the has checks are true.  

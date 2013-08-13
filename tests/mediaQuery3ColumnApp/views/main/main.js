@@ -4,7 +4,7 @@ function(lang, domClass){
 	return {
 		// view init
 		init: function(){
-			console.log("in init for view with this.name = "+this.name);
+			//console.log("in init for view with this.name = "+this.name);
 
 			// handle the backButton click
 			this.mainheaderBackButton.on("click", lang.hitch(this, function(e){

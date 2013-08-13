@@ -3,7 +3,7 @@ function(domClass){
 	return {
 		// view init
 		init: function(){
-			console.log("in init for view with this.name = "+this.name);
+			//console.log("in init for view with this.name = "+this.name);
 
 			// the back button is never shown for Nav
 			domClass.add(this.navheaderBackButton.domNode, "hide");
