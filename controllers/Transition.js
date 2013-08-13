@@ -234,18 +234,17 @@ define(["require", "dojo/_base/lang", "dojo/_base/declare", "dojo/has", "dojo/on
 
 		_doTransition: function(transitionTo, opts, params, data, parent, removeView, doResize, nested){
 			// summary:
-			//		Transitions from the currently visible scene to the defined scene.
+			//		Transitions from the currently visible view to the one passed in transitionTo.
 			//		It should determine what would be the best transition unless
 			//		an override in opts tells it to use a specific transitioning methodology
-			//		the transitionTo is a string in the form of [view]@[scene].  If
-			//		view is left of, the current scene will be transitioned to the default
-			//		view of the specified scene (eg @scene2), if the scene is left off
-			//		the app controller will instruct the active scene to the view (eg view1).  If both
-			//		are supplied (view1@scene2), then the application should transition to the scene,
-			//		and instruct the scene to navigate to the view.
+			//		the transitionTo is a string in the form of [view,subview].  If transitionTo
+			//		is not passed the parent.defaultView is used.  If one or more subviews are passed in transitionTo
+			//		the subviews will be handled with recursive calls to _doTransition.
+			//		_doTransition will call view.beforeActivate, view.afterActivate, view.beforeDeactivate, and
+			// 		view.afterDeactivate for the view and subviews as appropriate.
 			//
-			// transitionTo: Object
-			//		transition to view id. It looks like #tabScene,tab1
+			// transitionTo: String
+			//		transition to view id. It looks like "view,subView" or just "view"
 			// opts: Object
 			//		transition options
 			// params: Object
@@ -274,7 +273,7 @@ define(["require", "dojo/_base/lang", "dojo/_base/declare", "dojo/has", "dojo/on
 			if(transitionTo){
 				parts = transitionTo.split(",");
 			}else{
-				// If parent.defaultView is like "main,main", we also need to split it and set the value to toId and subIds.
+				// If parent.defaultView is like "main,sub", we also need to split it and set the value to toId and subIds.
 				// Or cannot get the next view by "parent.children[parent.id + '_' + toId]"
 				parts = parent.defaultView.split(",");
 			}
@@ -311,17 +310,8 @@ define(["require", "dojo/_base/lang", "dojo/_base/declare", "dojo/has", "dojo/on
 				next = null;
 			}
 
-			// next is not a Deferred object, so Deferred.when is no needed.
+			// next is not a Deferred object, so Deferred.when is not needed.
 			if(next !== current){
-				//When clicking fast, history module will cache the transition request que
-				//and prevent the transition conflicts.
-				//Originally when we conduct transition, selectedChild will not be the
-				//view we want to start transition. For example, during transition 1 -> 2
-				//if user click button to transition to 3 and then transition to 1. After
-				//1->2 completes, it will perform transition 2 -> 3 and 2 -> 1 because
-				//selectedChild is always point to 2 during 1 -> 2 transition and transition
-				//will record 2->3 and 2->1 right after the button is clicked.
-
 				//assume next is already loaded so that this.set(...) will not return
 				//a promise object. this.set(...) will handles the this.selectedChild,
 				//activate or deactivate views and refresh layout.
@@ -332,8 +322,7 @@ define(["require", "dojo/_base/lang", "dojo/_base/declare", "dojo/has", "dojo/on
 					var subChild = selChildren[i];
 					if(subChild && subChild.beforeDeactivate && subChild._active){
 						this.app.log("< in Transition._doTransition calling subChild.beforeDeactivate subChild name=[",subChild.name,"], parent.name=[",subChild.parent.name,"], next!==current path");
-						// TODO what to pass to beforeDeactivate here?
-						subChild.beforeDeactivate();
+						subChild.beforeDeactivate(next, data);
 					}
 				}
 				if(current && current._active){
