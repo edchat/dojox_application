@@ -58,7 +58,8 @@ define([
 		if(config){
 			// process the staticHasFeatures for the config with the call to configBuildProcessHas
 			// and use the processed config to add the app dependencies, controllers, modules etc.
-			config = configUtils.configBuildProcessHas(config, bc.staticHasFeatures);
+			var skipNonStaticHasSections = bc.skipNonStaticHasSections;  // set this true to skip the mids for all non-static has tests
+			config = configUtils.configBuildProcessHas(config, bc.staticHasFeatures, skipNonStaticHasSections);
 			var mids = [], params = {};
 			if(config.loaderConfig){
 				require(config.loaderConfig);

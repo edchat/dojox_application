@@ -7,7 +7,7 @@ return {
 	// summary:
 	//		This module contains the config
 
-	configBuildProcessHas: function(/*Object*/ source, /*Object*/ staticHasFeatures){
+	configBuildProcessHas: function(/*Object*/ source, /*Object*/ staticHasFeatures, /*boolean*/skipNonStaticHasSections){
 		// summary:
 		//		scan the source config for has checks which are included in staticHasFeatures and call configMerge to merge has sections, and remove the has sections from the source.
 		// description:
@@ -18,6 +18,11 @@ return {
 		//		The names in the has section can be separated by a comma, indicating that any of those being true will satisfy the test.
 		// source:
 		//		an object representing the config to be processed.
+		// staticHasFeatures:
+		//		an object holding the staticHasFeatures passed into the build.
+		// skipNonStaticHasSections:
+		//		a boolean true to skip has tests not included in the staticHasFeatures, false will allow mids for all has
+		//		dependencies or controllers set in has tests to be included in the build.
 		// returns:
 		//		the updated source object.
 		for(var name in source){
@@ -40,6 +45,10 @@ return {
 									}else{
 										delete sval[hasname];	// this has was included in staticHasFeatures but failed the test so remove this has part section from the config
 									}
+								}else if(!skipNonStaticHasSections){ // process this is a has test which is not in staticHasFeatures
+									var hasval = sval[hasname];
+									this.configMerge(source, hasval); // merge this has section into the source config
+									break;	// multiple has test, so go to the next one, do not delete these
 								}
 							}
 						}
@@ -52,7 +61,7 @@ return {
 				}
 			}else{ // name !== has, this is not a has section but it may contain an object with a has section
 				if(!(name.charAt(0) == '_' && name.charAt(1) == '_') && sval && typeof sval === 'object'){
-						this.configBuildProcessHas(sval, staticHasFeatures);
+						this.configBuildProcessHas(sval, staticHasFeatures, skipNonStaticHasSections);
 				}
 			}
 		}

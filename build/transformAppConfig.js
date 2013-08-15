@@ -17,8 +17,9 @@ define([
 			if(config){
 				// process the staticHasFeatures for the config with the call to configBuildProcessHas
 				// and set the updated config into resource.text with the staticHasFeatures processed
-				config = configUtils.configBuildProcessHas(config, bc.staticHasFeatures);
-				configStr = json.toJson(config, true); // prettyPrint is the second arg.
+				// always pass true for skipNonStaticHasSections when writing out the built config
+				config = configUtils.configBuildProcessHas(config, bc.staticHasFeatures, true);
+				configStr = json.toJson(config, false); // prettyPrint is the second arg.
 			}
 
 			resource.optimizedText = configStr;
