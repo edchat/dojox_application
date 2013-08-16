@@ -155,14 +155,9 @@
 							runTest : function() {
 								var dfd = new doh.Deferred();
 								setTimeout(function() {
-									var backHeader = registry.byId("dojox_mobile_Heading_1");
-									var transOpts = {
-										viewid : "home",
-										reverse : true,
-										url : "#home" // this is optional if not set it will be created from target
-									};
-									var ev = new TransitionEvent(backHeader.domNode, transOpts);
-									ev.dispatch();
+									if(history){
+										history.back();
+									}
 									return dfd.callback(true);
 								}, 500);
 								return dfd;
@@ -224,14 +219,9 @@
 							runTest : function() {
 								var dfd = new doh.Deferred();
 								setTimeout(function() {
-									var backHeader = registry.byId("dojox_mobile_Heading_1");
-									var transOpts = {
-										viewid : "home",
-										reverse : true,
-										url : "#home" // this is optional if not set it will be created from target
-									};
-									var ev = new TransitionEvent(backHeader.domNode, transOpts);
-									ev.dispatch();
+									if(history){
+										history.back();
+									}
 									return dfd.callback(true);
 								}, 500);
 								return dfd;

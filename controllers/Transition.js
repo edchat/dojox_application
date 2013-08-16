@@ -232,6 +232,46 @@ define(["require", "dojo/_base/lang", "dojo/_base/declare", "dojo/has", "dojo/on
 			return viewParams;
 		},
 
+
+		handleViewUnloads: function(current){
+			// summary:
+			//		Check to see if this view or one of it's siblings need to be unloaded, and unload it.
+			//
+			// view: Object
+			//		the view
+			// if autoUnload is true unload the current view and its children
+			if(current.alwaysAutoUnload){
+				var params = {};
+				params.parent = current.parent;
+				params.view = current;
+				this.app.emit("app-unload-view", params);
+			}
+			//if autoUnloadCount is set we need to check other sibling views to see which views should be unloaded.
+			var parent = current.parent;
+			if(this.app.autoUnloadCount){
+				var constraint = current.constraint;// || "center";
+				var type = typeof(constraint);
+				var hash = (type == "string" || type == "number") ? constraint : constraint.__hash;
+				for(var otherChildKey in parent.children){
+					var otherChild = parent.children[otherChildKey];
+					var otherChildConstraint = otherChild.constraint;// || "center";
+					var childtype = typeof(otherChildConstraint);
+					var childhash = (childtype == "string" || childtype == "number") ? otherChildConstraint : otherChildConstraint.__hash;
+					if(hash == childhash && otherChild !== current){
+						if(!otherChild.neverAutoUnload && otherChild.transitionCount >= this.app.autoUnloadCount){
+							console.log("in Transition handleViewUnloads unloading otherChildKey "+otherChildKey);
+							var params = {};
+							params.parent = parent;
+							params.view = otherChild;
+							this.app.emit("app-unload-view", params);
+						}
+					}
+				}
+
+			}
+		},
+
+
 		_doTransition: function(transitionTo, opts, params, data, parent, removeView, doResize, nested){
 			// summary:
 			//		Transitions from the currently visible scene to the defined scene.
@@ -397,6 +437,7 @@ define(["require", "dojo/_base/lang", "dojo/_base/declare", "dojo/has", "dojo/on
 						this.app.log("  < in Transition._doTransition calling current.afterDeactivate current name=[",current.name,"], parent.name=[",current.parent.name,"], next!==current path");
 						current.afterDeactivate(next, data);
 						current._active = false;
+						this.handleViewUnloads(current);
 					}
 					if(next){
 						this.app.log("  > in Transition._doTransition calling next.afterActivate next name=[",next.name,"], parent.name=[",next.parent.name,"], next!==current path");

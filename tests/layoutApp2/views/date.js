@@ -29,7 +29,7 @@ function(lang, on, registry, stamp){
 				var view = this.parent.children.layoutApp2_simple;
 				params.view = view;
 			//	params.viewId = view.id;
-				this.app.emit("unload-view", params);
+				this.app.emit("app-unload-view", params);
 			}));
 			_onResults.push(onResult);
 
@@ -39,7 +39,7 @@ function(lang, on, registry, stamp){
 				var view = this.parent.children.layoutApp2_listMain;
 				params.view = view;
 				//params.viewId = view.id;
-				this.app.emit("unload-view", params);
+				this.app.emit("app-unload-view", params);
 			}));
 			_onResults.push(onResult);
 

@@ -31,6 +31,20 @@ define(["dojo/_base/array"], function(arr){
 			var type = typeof(constraint);
 			var hash = (type == "string" || type == "number") ? constraint : constraint.__hash;
 			view.selectedChildren[hash] = child;
+			child.transitionCount = 0;
+
+			// add code to bump the transitionCounter to see when to unload other child views
+			for(var otherChildKey in view.children){
+				var otherChild = view.children[otherChildKey];
+				var otherChildConstraint = otherChild.constraint;// || "center";
+				var childtype = typeof(otherChildConstraint);
+				var childhash = (childtype == "string" || childtype == "number") ? otherChildConstraint : otherChildConstraint.__hash;
+				if(hash == childhash && otherChild !== child){
+					otherChild.transitionCount++;
+					console.log("otherChild.transitionCount for view "+otherChildKey+ " ="+otherChild.transitionCount);
+				}
+			}
+
 		},
 
 

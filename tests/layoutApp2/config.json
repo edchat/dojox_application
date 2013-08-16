@@ -32,8 +32,8 @@
 	"controllers": [
 		"dojox/app/controllers/Load",
 		"dojox/app/controllers/Transition",
-		"dojox/app/controllers/Layout",
-		"dojox/app/tests/layoutApp2/controllers/UnloadViewController"
+		"dojox/app/controllers/Layout"
+		//,"dojox/app/tests/layoutApp2/controllers/UnloadViewController"
 	],
 
 	//stores we are using
@@ -90,6 +90,7 @@
 	//"defaultTransition": "none",
 	//"defaultTransition": "fade",
 	"defaultTransition": "fade",
+	"autoUnloadCount" : 2,
 
 	"views": {
 		"navigation":{
@@ -99,6 +100,7 @@
 		"simple":{
 			"controller" : "layoutApp2/views/simple.js",
 			"constraint" : "center",
+			"alwaysAutoUnload" : false,
 			"template": "layoutApp2/views/simple.html",
 			"dependencies":["dojox/mobile/TextBox"]
 		},
@@ -106,6 +108,7 @@
 		//list view, include list view and details view
 		"listMain": {
 			"defaultView": "list",
+			"neverAutoUnload" : true,
 			"transition": "flip",
 			"constraint" : "center",
 
