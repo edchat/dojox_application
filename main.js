@@ -203,34 +203,20 @@ define(["require", "dojo/_base/kernel", "dojo/_base/lang", "dojo/_base/declare",
 					viewId: this.defaultView,
 					params: this._startParams,
 					callback: lang.hitch(this, function (){
-						var parts = this.defaultView.split('+'), selectId, constraint;
-						// TODO all this code should be moved to a controller, there is no reason to do that here
-						// for initial view and somewhere else for the rest
-						if(parts.length > 0){		
-							while(parts.length > 0){ 	
-								var viewId = parts.shift();
-								selectId = viewId.split(",").shift();
-								// set the constraint
-								if(!this.children[this.id + "_" + selectId].hasOwnProperty("constraint")){
-									this.children[this.id + '_' + selectId].constraint = domAttr.get(this.children[this.id + '_' + selectId].domNode, "data-app-constraint") || "center";
-								}
-								constraints.register(constraint = this.children[this.id + '_' + selectId].constraint);
-								constraints.setSelectedChild(this, constraint, this.children[this.id + '_' + selectId]);
-							}
-						}else{
-							var selectId = this.defaultView.split(",").shift();
-							// set the constraint
-							if(!this.children[this.id + "_" + selectId].hasOwnProperty("constraint")){
-								this.children[this.id + '_' + selectId].constraint = domAttr.get(this.children[this.id + '_' + selectId].domNode, "data-app-constraint") || "center";
-							}
-							constraints.register(constraint = this.children[this.id + '_' + selectId].constraint);
-							constraints.setSelectedChild(this, constraint, this.children[this.id + '_' + selectId]);
-						}
-						// transition to startView. If startView==defaultView, that means initial the default view.
+						var saveTrans = this.transition;  // save this to set it to none and restore it
+						this.transition = "none";	// we want to avoid the transition on the first display for the defaultView
 						this.emit("app-transition", {
-							viewId: this._startView,
+							viewId: this.defaultView,
 							opts: { params: this._startParams }
 						});
+						this.transition = saveTrans;
+						if(this.defaultView !== this._startView){
+						// transition to startView. If startView==defaultView, that means initial the default view.
+							this.emit("app-transition", {
+								viewId: this._startView,
+								opts: { params: this._startParams }
+							});
+						}
 						this.setStatus(this.lifecycle.STARTED);
 					})
 				});
@@ -335,6 +321,7 @@ define(["require", "dojo/_base/kernel", "dojo/_base/lang", "dojo/_base/declare",
 							}
 							console.log(msg,arguments[arguments.length-1]);
 						}catch(e){}
+
 					};
 				}else{
 					app.log = function(){}; // noop
