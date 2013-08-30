@@ -60,17 +60,30 @@ function(dom, domStyle, connect, registry, has, TransitionEvent){
 		},
 		afterActivate: function(){
 			//console.log(MODULE+" afterActivate");
-			if(!this.app.timedAutoFlow){
+			if(!this.app.timedAutoFlow && !this.app.timed100Loops){
 				return;
 			}
 			if(!this.app.loopCount){
 				this.app.loopCount = 0;
-				console.log("TestInfo:afterActivate loopCount = 0 start timer");
+				console.log("V2:afterActivate loopCount = 0 start timer");
 				console.time("timing transition loop");
 			}
 			this.app.loopCount++;
 			//console.log(MODULE+" afterActivate this.app.loopCount="+this.app.loopCount);
 			var liWidget = null;
+			if(this.app.timed100Loops){
+				if(this.app.loopCount < 100) {
+					liWidget = registry.byId("dojox_mobile_ListItem_6"); //0 - P1,S1,V1 6 - P2,S2,Ss2,V5+P2,S2,Ss2,V6
+					if(liWidget){
+						var ev = new TransitionEvent(liWidget.domNode, liWidget.params);
+						ev.dispatch();
+					}
+				}else{
+					console.log("V2:afterActivate loopCount = 100 stop timer");
+					console.timeEnd("timing transition loop");
+				}
+				return;
+			}
 			if(this.app.loopCount === 1){
 				liWidget = registry.byId("dojox_mobile_ListItem_1"); //V2
 			}else if(this.app.loopCount === 2) {

@@ -46,7 +46,9 @@ define(["require", "dojo/_base/lang", "dojo/_base/declare", "dojo/has", "dojo/on
 			//
 			// event: Object
 			//		"app-transition" event parameter. It should be like this: {"viewId": viewId, "opts": opts}
-			
+			var F = MODULE+":transition";
+			this.app.log(F+" event.viewId=[",event.viewId,"], event.opts=",event.opts);
+
 			var viewsId = event.viewId || "";
 			this.proceedingSaved = this.proceeding;	
 			var parts = viewsId.split('+');
@@ -79,6 +81,7 @@ define(["require", "dojo/_base/lang", "dojo/_base/declare", "dojo/has", "dojo/on
 						newEvent = lang.clone(event);
 						newEvent.viewId = remViewId;
 						newEvent._removeView = true;
+						newEvent._doResize = true; // at the end of the last transition call resize
 						this.proceedTransition(newEvent);
 					}
 				}
@@ -143,25 +146,25 @@ define(["require", "dojo/_base/lang", "dojo/_base/declare", "dojo/has", "dojo/on
 			var F = MODULE+":proceedTransition";
 
 			if(this.proceeding){
-				this.app.log("in "+F+" push event", transitionEvt);
+				this.app.log(F+" push event", transitionEvt);
 				this.waitingQueue.push(transitionEvt);
 				this.processingQueue = false;
 				return;
 			}
 			// If there are events waiting, needed to have the last in be the last processed, so add it to waitingQueue
 			// process the events in order.
-			this.app.log("in "+F+" this.waitingQueue.length ="+ this.waitingQueue.length+ " this.processingQueue="+this.processingQueue);
+			this.app.log(F+" this.waitingQueue.length ="+ this.waitingQueue.length+ " this.processingQueue="+this.processingQueue);
 			if(this.waitingQueue.length > 0 && !this.processingQueue){
 				this.processingQueue = true;
-				this.app.log("in "+F+" push event past proceeding", transitionEvt);
+				this.app.log(F+" push event past proceeding", transitionEvt);
 				this.waitingQueue.push(transitionEvt);
 				transitionEvt = this.waitingQueue.shift();
-				this.app.log("in "+F+" shifted waitingQueue to process", transitionEvt);
+				this.app.log(F+" shifted waitingQueue to process", transitionEvt);
 			}
 			
 			this.proceeding = true;
 
-			this.app.log("in "+F+" calling trigger load", transitionEvt);
+			this.app.log(F+" calling trigger load", transitionEvt);
 			if(!transitionEvt.opts){
 				transitionEvt.opts = {};
 			}
@@ -283,7 +286,7 @@ define(["require", "dojo/_base/lang", "dojo/_base/declare", "dojo/has", "dojo/on
 				throw Error("view parent not found in transition.");
 			}
 
-			this.app.log("in "+F+" transitionTo=[",transitionTo,"], removeView = [",removeView,"] parent.name=[",parent.name,"], opts=",opts);
+			this.app.log(F+" transitionTo=[",transitionTo,"], removeView = [",removeView,"] parent.name=[",parent.name,"], opts=",opts);
 
 			var parts, toId, subIds, next;
 			if(transitionTo){
@@ -300,7 +303,7 @@ define(["require", "dojo/_base/lang", "dojo/_base/declare", "dojo/has", "dojo/on
 			next = parent.children[parent.id + '_' + toId];
 			if(!next){
 				if(removeView){
-					this.app.log("> in "+F+" called with removeView true, but that view is not available to remove");
+					this.app.log(F+" called with removeView true, but that view is not available to remove");
 					return;	// trying to remove a view which is not showing
 				}
 				throw Error("child view must be loaded before transition.");
@@ -326,7 +329,7 @@ define(["require", "dojo/_base/lang", "dojo/_base/declare", "dojo/has", "dojo/on
 
 			if(removeView){
 				if(next !== current){ // nothing to remove
-					this.app.log("> in "+F+" called with removeView true, but that view is not available to remove");
+					this.app.log(F+" called with removeView true, but that view is not available to remove");
 					return;	// trying to remove a view which is not showing
 				}	
 				this.translog(F,"Transition Remove current From="+currentSubNames);
@@ -367,11 +370,11 @@ define(["require", "dojo/_base/lang", "dojo/_base/declare", "dojo/has", "dojo/on
 					this.handleBeforeDeactivateCalls(currentSubViewArray, next, current, data, subIds);
 				}
 				if(next){
-					this.app.log("> in "+F+" calling next.beforeActivate next name=[",next.name,"], parent.name=[",next.parent.name,"], next!==current path");
+					this.app.log(F+" calling handleBeforeActivateCalls next name=[",next.name,"], parent.name=[",next.parent.name,"]");
 					this.handleBeforeActivateCalls(nextSubViewArray, current, data, subIds);
 				}
 				if(!removeView){
-					this.app.log("> in "+F+" calling handleLayoutAndResizeCalls");
+					this.app.log(F+" calling handleLayoutAndResizeCalls");
 					this.handleLayoutAndResizeCalls(nextSubViewArray, removeView, doResize, subIds);
 				}
 				var result = true;
@@ -402,7 +405,7 @@ define(["require", "dojo/_base/lang", "dojo/_base/declare", "dojo/has", "dojo/on
 				}
 				when(result, lang.hitch(this, function(){
 					if(next){
-						this.app.log("    < in "+F+" back from transit for next ="+next.name);
+						this.app.log(F+" back from transit for next ="+next.name);
 					}
 					if(removeView){
 						this.handleLayoutAndResizeCalls(nextSubViewArray, removeView, doResize, subIds);
@@ -474,7 +477,8 @@ define(["require", "dojo/_base/lang", "dojo/_base/declare", "dojo/has", "dojo/on
 			for(var i = 0; i < subs.length; i++){
 				var v = subs[i];
 				this.translog(F,"emit layoutView v.id=["+v.id+"] removeView = ["+remove+"]");
-				this.app.emit("app-layoutView", {"parent": v.parent, "view": v, "removeView": remove});
+				// it seems like we should be able to minimize calls to resize by passing doResize: false and only doing resize on the app-resize emit
+				this.app.emit("app-layoutView", {"parent": v.parent, "view": v, "removeView": remove, "doResize": false});
 				remove = false;
 			}
 			if(doResize){

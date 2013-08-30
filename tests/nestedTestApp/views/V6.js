@@ -76,12 +76,24 @@ function(dom, domStyle, connect, registry, has, TransitionEvent){
 				console.timeEnd("timing transition loop");
 			}
 		*/
-			if(!this.app.timedAutoFlow){
+			if(!this.app.timedAutoFlow && !this.app.timed100Loops){
 				return;
 			}
 			this.app.loopCount++;
 			//console.log(MODULE+" afterActivate this.app.loopCount="+this.app.loopCount);
 			var liWidget = null;
+			if(this.app.timed100Loops){
+				if(this.app.loopCount < 100) {
+					if(history){
+						history.back();
+					}
+				}else{
+					console.log("P1:afterActivate loopCount = 100 stop timer");
+					console.timeEnd("timing transition loop");
+				}
+				return;
+			}
+
 			if(this.app.loopCount === 10){
 				liWidget = registry.byId("dojox_mobile_ListItem_0"); //P1,S1,V1
 			}else if(this.app.loopCount === 12) {

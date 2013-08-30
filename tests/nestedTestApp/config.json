@@ -78,8 +78,9 @@
 	// these are the possible transitions, 
 	// if a transition is set on a view or parent it will override the transition set on the transitionEvent or the defaultTransition in the config.
 	"transition": "slide",
-	"logTransitions": 1,
-	"timedAutoFlow": 1,
+	"logTransitions": 0,
+	"timedAutoFlow": 0,
+	"timed100Loops": 0,
 
 	//views are groups of views and models loaded at once
 	"views": {
@@ -101,6 +102,7 @@
 				"S1": {
 					"template": "nestedTestApp/views/S1.html",
 					"controller": "nestedTestApp/views/S1.js",
+					"defaultView": "V1",
 					"views": {
 						"TestInfo": {
 							"transition": "none",
@@ -137,6 +139,7 @@
 				"S2": {
 					"views": {
 						"Ss2": {
+							"defaultView": "V5",
 							"views": {
 								"V5": {
 									"controller": "nestedTestApp/views/V5.js",
