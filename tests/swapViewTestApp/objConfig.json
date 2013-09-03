@@ -34,6 +34,7 @@
         "dojox/mvc/Repeat",
         "dojox/mvc/Output",
 		"dojox/mobile/View",
+		"dojo/dom", "dojo/_base/connect", "dijit/registry", "dojox/mvc/at",
 		"dojox/app/widgets/Container"
 	],
 
@@ -42,7 +43,7 @@
 	"controllers": [
 		"dojox/app/controllers/Load",
 		"dojox/app/controllers/Transition",
-		"dojox/app/tests/swapViewTestApp/controllers/DivIdBasedLayout"
+		"dojox/app/tests/swapViewTestApp/controllers/ObjBasedLayout"
 	],
 
 	//stores we are using
@@ -100,7 +101,7 @@
 	//"defaultView": "header+navigation+TestInfo",
 	//"defaultView": "main+header+TestInfo+simple+repeatList+navigation",
 	"defaultView": "header+TestInfo+simple+repeatList+navigation",
-	
+
 
 	// these are the possilbe defaultTransitions
 	"defaultTransition": "slide",
@@ -110,41 +111,36 @@
 	"template": "swapViewTestApp/views/main.html",
 
 	"views": {
-	//	"main": {
-	//		"controller" : "swapViewTestApp/views/main.js",
-	//		"constraint" : "center",
-	//		"template": "swapViewTestApp/views/main.html"
-	//	},
 		"navigation":{
 			"controller" : "swapViewTestApp/views/navigation.js",
-			"constraint" : "nav1Id",
+			"constraint" : {"parentId":"nav1Id"},
 			"template": "swapViewTestApp/views/navigation.html"
 		},
 		"TestInfo": {
 			"controller" : "swapViewTestApp/views/TestInfo.js",
-			"constraint" : "swapView1Id",
+			"constraint" : {"parentId":"swapView1Id", "class": "center"},
 			"template": "swapViewTestApp/views/TestInfo.html"
 		},	
 		"header":{
-			"constraint" : "heading1Id",
+			"constraint" : {"parentId":"heading1Id"},
 			"template": "swapViewTestApp/views/header.html"
 		},
 		"simple":{
 			"controller" : "swapViewTestApp/views/simple.js",
-			"constraint" : "swapView2Id",
+			"constraint" : {"parentId":"swapView2Id", "class": "center"},
 			"template": "swapViewTestApp/views/simple.html",
 			"dependencies":["dojox/mobile/TextBox"]
 		},
 
 		"repeatList":{
 			"controller" : "swapViewTestApp/views/repeat.js",
-			"constraint" : "swapView3Id",
+			"constraint" : {"parentId":"swapView3Id", "class": "test"},
 			"template": "swapViewTestApp/views/repeat.html",
 			"dependencies":["dojox/mobile/TextBox"]
 		},
 		"repeatDetails":{
 			"controller" : "swapViewTestApp/views/repeatDetails.js",
-			"constraint" : "swapView3Id",
+			"constraint" : {"parentId":"swapView3Id", "class": "test"},
 			"template": "swapViewTestApp/views/repeatDetails.html",
 			"dependencies":["dojox/mobile/TextBox"]
 		}

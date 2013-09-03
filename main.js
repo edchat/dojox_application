@@ -203,7 +203,7 @@ define(["require", "dojo/_base/kernel", "dojo/_base/lang", "dojo/_base/declare",
 					viewId: this.defaultView,
 					params: this._startParams,
 					callback: lang.hitch(this, function (){
-						var saveTrans = this.transition;  // save this to set it to none and restore it
+						var saveTrans = this.transition; // save this to set it to none and restore it
 						this.transition = "none";	// we want to avoid the transition on the first display for the defaultView
 						this.emit("app-transition", {
 							viewId: this.defaultView,
@@ -337,13 +337,13 @@ define(["require", "dojo/_base/kernel", "dojo/_base/lang", "dojo/_base/declare",
 					//		Contains the transition options.
 					// triggerEvent:
 					//		The event that triggered the transition (for example a touch event on a ListItem).
-					var opts = {bubbles:true, cancelable:true, detail: transitionOptions, triggerEvent: triggerEvent||null};	
+					var opts = {bubbles:true, cancelable:true, detail: transitionOptions, triggerEvent: triggerEvent || null};
 					on.emit(target,"startTransition", opts);
 				};
 
 				app.setStatus(app.lifecycle.STARTING);
 				// Create global namespace for application.
-				// The global name is application id. For example: modelApp
+				// The global name is application id. ie: modelApp
 				var globalAppName = app.id;
 				if(window[globalAppName]){
 					lang.mixin(app, window[globalAppName]);

@@ -3,13 +3,13 @@ define(["dojo/_base/declare", "dojo/dom", "dojo/dom-style",
 		"dojox/app/controllers/LayoutBase"],
 function(declare, dom, domStyle, domClass, domAttr, domConstruct, LayoutBase){
 	// module:
-	//		dojox/app/tests/swapViewTestApp/controllers/DivIdBasedLayout
+	//		dojox/app/tests/swapViewTestApp/controllers/ObjBasedLayout
 	// summary:
-	//		Will layout an application based upon div ids.  
+	//		Will layout an application based upon constraint obj with id, and class.
 	//		Each view will be appended inside the div with the id that matches the value set in the constraints for the view.
 	//		
 
-	return declare("dojox/app/tests/swapViewTestApp/controllers/DivIdBasedLayout", LayoutBase, {
+	return declare("dojox/app/tests/swapViewTestApp/controllers/ObjBasedLayout", LayoutBase, {
 
 		initLayout: function(event){
 			// summary:
@@ -22,18 +22,24 @@ function(declare, dom, domStyle, domClass, domAttr, domConstruct, LayoutBase){
 			//
 			// event: Object
 			// |		{"view": view, "callback": function(){}};
-			this.app.log("in app/controllers/DivIdBasedLayout.initLayout event.view.name=[",event.view.name,"] event.view.parent.name=[",event.view.parent.name,"]");
+			this.app.log("in app/controllers/ObjBasedLayout.initLayout event.view.name=[",event.view.name,"] event.view.parent.name=[",event.view.parent.name,"]");
 
 
-			this.app.log("in app/controllers/DivIdBasedLayout.initLayout event.view.constraint=",event.view.constraint);
+			this.app.log("in app/controllers/ObjBasedLayout.initLayout event.view.constraint=",event.view.constraint);
 			var constraint = event.view.constraint;  // constraint holds the region for this view, center, top etc.
-			var parentDiv = dom.byId(constraint);
+			var parentId = constraint;
+			if(constraint.parentId){
+				parentId = constraint.parentId;
+			}
+			var parentDiv = dom.byId(parentId);
 			if(parentDiv){  // If the parentDiv is found append this views domNode to it
 				parentDiv.appendChild(event.view.domNode);
 			}else{
 				event.view.parent.domNode.appendChild(event.view.domNode);
 			}
-			domClass.add(event.view.domNode, constraint);  // set the class to the constraint
+			if(constraint.class){
+				domClass.add(event.view.domNode, constraint.class);  // set the class to the constraint
+			}
 
 			this.inherited(arguments);
 		},

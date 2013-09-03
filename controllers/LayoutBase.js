@@ -118,7 +118,7 @@ function(lang, declare, has, win, config, domAttr, topic, domStyle, constraints,
 				this.showView(view);
 				//domStyle.set(view.domNode, "zIndex", 50);
 				constraints.setSelectedChild(parent, view.constraint, view);
-			}else {
+			}else{
 				view.viewShowing = true;
 				this.showView(view);
 				//domStyle.set(view.domNode, "zIndex", 50);

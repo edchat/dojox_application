@@ -83,20 +83,24 @@
 	//views are groups of views and models loaded at once
 	"views": {
 		"Nav1": {
+			"transition": "none",
 			"controller": "notNestedTestApp/views/configuration/Nav1.js",
 			"template": "notNestedTestApp/views/configuration/Nav1.html"
 		},
 		"Nav2": {
+			"transition": "none",
 			"template": "notNestedTestApp/views/tablet/ViewScrollableLists.html",
 			"controller": "notNestedTestApp/views/tablet/ViewScrollableLists",
 			"constraint" : "left"
 		},
 		"P1": {
+			"transition": "none",
 			"controller": "notNestedTestApp/views/P1.js",
 			"template": "notNestedTestApp/views/P1.html",
 			"constraint" : "bottom"
 		},
 		"S1": {
+			"transition": "none",
 			"template": "notNestedTestApp/views/S1.html",
 			"controller": "notNestedTestApp/views/S1.js",
 			"constraint" : "top"
