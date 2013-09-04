@@ -332,7 +332,6 @@ define(["require", "dojo/_base/lang", "dojo/_base/declare", "dojo/has", "dojo/on
 				next = null;
 			}
 
-			var currentLastSubChild = this.lastSubChildMatch || current; // currentLastSubChild holds the view to transition from
 			// get the list of nextSubNames, this is next.name followed by the subIds
 			var nextSubNames = "";
 			if(next){
@@ -374,11 +373,12 @@ define(["require", "dojo/_base/lang", "dojo/_base/declare", "dojo/has", "dojo/on
 				}
 				var result = true;
 
-				if(transit && (!nested || this.lastSubChildMatch != null) && currentLastSubChild !== next){
+				// this.currentLastSubChildMatch holds the view to transition from
+				if(transit && (!nested || this.currentLastSubChildMatch != null) && this.currentLastSubChildMatch !== next){
 					// css3 transit has the check for IE so it will not try to do it on ie, so we do not need to check it here.
 					// We skip in we are transitioning to a nested view from a parent view and that nested view
 					// did not have any current
-					result = this._handleTransit(next, parent, currentLastSubChild, opts, toId, removeView)
+					result = this._handleTransit(next, parent, this.currentLastSubChildMatch, opts, toId, removeView)
 				}
 				when(result, lang.hitch(this, function(){
 					if(next){
@@ -541,7 +541,7 @@ define(["require", "dojo/_base/lang", "dojo/_base/declare", "dojo/has", "dojo/on
 			var currentSubViewArray = [];
 			var constraint, type, hash;
 			var p = parent;
-			this.lastSubChildMatch = null;
+			this.currentLastSubChildMatch = null;
 			this.nextLastSubChildMatch = null;
 
 			for(var i = nextSubViewArray.length-1; i >= 0; i--){
@@ -551,22 +551,23 @@ define(["require", "dojo/_base/lang", "dojo/_base/declare", "dojo/has", "dojo/on
 				// if there is a selected child for this constraint, and the child matches this view, push it.
 				if(p && p.selectedChildren && p.selectedChildren[hash]){
 					if(p.selectedChildren[hash] == nextSubViewArray[i]){
-						this.lastSubChildMatch = p.selectedChildren[hash];
+						this.currentLastSubChildMatch = p.selectedChildren[hash];
 						this.nextLastSubChildMatch = nextSubViewArray[i];
-						currentSubViewArray.push(this.lastSubChildMatch);
-						p = this.lastSubChildMatch;
+						currentSubViewArray.push(this.currentLastSubChildMatch);
+						p = this.currentLastSubChildMatch;
 					}else{
-						this.lastSubChildMatch = p.selectedChildren[hash];
-						currentSubViewArray.push(this.lastSubChildMatch);
-						// Here since they had the constraint but it was not the same I need to deactivate all children of this.lastSubChildMatch
+						this.currentLastSubChildMatch = p.selectedChildren[hash];
+						currentSubViewArray.push(this.currentLastSubChildMatch);
+						// Here since they had the constraint but it was not the same I need to deactivate all children of this.currentLastSubChildMatch
 						if(!removeView){
-							var selChildren = constraints.getAllSelectedChildren(this.lastSubChildMatch);
+							var selChildren = constraints.getAllSelectedChildren(this.currentLastSubChildMatch);
 							currentSubViewArray = currentSubViewArray.concat(selChildren);
 						}
 						break;
 					}
 				}else{ // the else is for the constraint not matching which means no more to deactivate.
-					this.lastSubChildMatch = null; // there was no view selected for this constraint
+					this.currentLastSubChildMatch = null; // there was no view selected for this constraint
+					this.nextLastSubChildMatch = nextSubViewArray[i]; // set this to the next view for transition to an empty constraint
 					break;
 				}
 
