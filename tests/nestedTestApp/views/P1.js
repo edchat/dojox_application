@@ -14,6 +14,8 @@ function(dom, domStyle, connect, registry, has, TransitionEvent){
 		},
 
 		afterActivate: function(){
+			// summary:
+			//		view life cycle afterActivate()
 			//console.log(MODULE+" afterActivate");
 		/*
 			//loop test

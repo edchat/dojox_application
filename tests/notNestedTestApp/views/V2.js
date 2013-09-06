@@ -1,5 +1,5 @@
-define(["dojo/dom", "dojo/dom-style", "dojo/_base/connect","dijit/registry", "dojo/sniff"],
-function(dom, domStyle, connect, registry, has){
+define(["dojo/dom", "dojo/dom-style", "dojo/_base/connect","dijit/registry", "dojo/sniff", "dojox/mobile/TransitionEvent"],
+function(dom, domStyle, connect, registry, has, TransitionEvent){
 		var _connectResults = []; // events connect result
 		var	list = null;
 		var listId = 'list2';
@@ -45,7 +45,11 @@ function(dom, domStyle, connect, registry, has){
 			if(dom.byId(backId) && !has("phone")){
 				domStyle.set(dom.byId(backId), "visibility", "hidden"); // hide the back button in tablet mode
 			}
-			
+
+			if(registry.byId("heading1")){
+				registry.byId("heading1").labelDivNode.innerHTML = "Long List Two";
+			}
+
 			app.list2 = registry.byId(listId);
 
 			list = app.list2;
@@ -60,6 +64,41 @@ function(dom, domStyle, connect, registry, has){
 		},
 		afterActivate: function(){
 			//console.log(MODULE+" afterActivate");
+			if(!this.app.timedAutoFlow && !this.app.timed100Loops){
+				return;
+			}
+			if(!this.app.loopCount){
+				this.app.loopCount = 0;
+				console.log("V2:afterActivate loopCount = 0 start timer");
+				console.time("timing transition loop");
+			}
+			this.app.loopCount++;
+			//console.log(MODULE+" afterActivate this.app.loopCount="+this.app.loopCount);
+			var liWidget = null;
+			if(this.app.timed100Loops){
+				if(this.app.loopCount < 100) {
+					liWidget = registry.byId("dojox_mobile_ListItem_6"); //0 - P1,S1,V1 6 - P2,S2,Ss2,V5+P2,S2,Ss2,V6
+					if(liWidget){
+						var ev = new TransitionEvent(liWidget.domNode, liWidget.params);
+						ev.dispatch();
+					}
+				}else{
+					console.log("V2:afterActivate loopCount = 100 stop timer");
+					console.timeEnd("timing transition loop");
+				}
+				return;
+			}
+			if(this.app.loopCount === 1){
+				liWidget = registry.byId("dojox_mobile_ListItem_1"); //Nav2+V2
+			}else if(this.app.loopCount === 2) {
+				liWidget = registry.byId("dojox_mobile_ListItem_3"); //V4
+			}else if(this.app.loopCount === 7) {
+				liWidget = registry.byId("dojox_mobile_ListItem_0"); //P1,S1,V1
+			}
+			if(liWidget){
+				var ev = new TransitionEvent(liWidget.domNode, liWidget.params);
+				ev.dispatch();
+			}
 		},
 		beforeDeactivate: function(){
 			//console.log(MODULE+" beforeDeactivate");

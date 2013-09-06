@@ -78,8 +78,8 @@
 	// these are the possible transitions, 
 	// if a transition is set on a view or parent it will override the transition set on the transitionEvent or the defaultTransition in the config.
 	"transition": "slide",
-	"logTransitions": 0,
-	"timedAutoFlow": 0,
+	"logTransitions": 1,
+	"timedAutoFlow": 1,
 	"timed100Loops": 0,
 
 	//views are groups of views and models loaded at once

@@ -1,5 +1,5 @@
-define(["dojo/dom", "dojo/dom-style", "dojo/_base/connect","dijit/registry", "dojo/sniff"],
-function(dom, domStyle, connect, registry, has){
+define(["dojo/dom", "dojo/dom-style", "dojo/_base/connect","dijit/registry", "dojo/sniff", "dojox/mobile/TransitionEvent"],
+function(dom, domStyle, connect, registry, has, TransitionEvent){
 		var _connectResults = []; // events connect result
 		var	list = null;
 		var listId = 'list5';
@@ -60,6 +60,21 @@ function(dom, domStyle, connect, registry, has){
 		},
 		afterActivate: function(){
 			//console.log(MODULE+" afterActivate");
+			if(!this.app.timedAutoFlow){
+				return;
+			}
+			this.app.loopCount++;
+			//console.log(MODULE+" afterActivate this.app.loopCount="+this.app.loopCount);
+			var liWidget = null;
+			if(this.app.loopCount === 9){
+				liWidget = registry.byId("dojox_mobile_ListItem_7"); //V6
+			}else if(this.app.loopCount === 15) {
+				liWidget = registry.byId("dojox_mobile_ListItem_12"); //Test Instructions
+			}
+			if(liWidget){
+				var ev = new TransitionEvent(liWidget.domNode, liWidget.params);
+				ev.dispatch();
+			}
 		},
 		beforeDeactivate: function(){
 			//console.log(MODULE+" beforeDeactivate");

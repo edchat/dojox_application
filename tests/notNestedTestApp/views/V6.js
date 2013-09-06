@@ -1,5 +1,5 @@
-define(["dojo/dom", "dojo/dom-style", "dojo/_base/connect","dijit/registry", "dojo/sniff"],
-function(dom, domStyle, connect, registry, has){
+define(["dojo/dom", "dojo/dom-style", "dojo/_base/connect","dijit/registry", "dojo/sniff", "dojox/mobile/TransitionEvent"],
+function(dom, domStyle, connect, registry, has, TransitionEvent){
 		var _connectResults = []; // events connect result
 		var	list = null;
 		var listId = 'list6';
@@ -60,6 +60,51 @@ function(dom, domStyle, connect, registry, has){
 		},
 		afterActivate: function(){
 			//console.log(MODULE+" afterActivate");
+		/*
+			if(!this.app.loopCount){
+				this.app.loopCount = 0;
+				console.time("timing transition loop");
+			}
+			//loop test
+			if(this.app.loopCount++ < 100){
+			//	dojox_mobile_ListItem_0
+				var liWidget = registry.byId("dojox_mobile_ListItem_0");
+				var ev = new TransitionEvent(liWidget.domNode, liWidget.params);
+				ev.dispatch();
+			}else{
+			//	console.time("timing transition loop");
+				console.timeEnd("timing transition loop");
+			}
+		*/
+			if(!this.app.timedAutoFlow && !this.app.timed100Loops){
+				return;
+			}
+			this.app.loopCount++;
+			//console.log(MODULE+" afterActivate this.app.loopCount="+this.app.loopCount);
+			var liWidget = null;
+			if(this.app.timed100Loops){
+				if(this.app.loopCount < 100) {
+					if(history){
+						history.back();
+					}
+				}else{
+					console.log("P1:afterActivate loopCount = 100 stop timer");
+					console.timeEnd("timing transition loop");
+				}
+				return;
+			}
+
+			if(this.app.loopCount === 10){
+				liWidget = registry.byId("dojox_mobile_ListItem_0"); //P1,S1,V1
+			}else if(this.app.loopCount === 12) {
+				liWidget = registry.byId("dojox_mobile_ListItem_3"); //P1,S1,V8
+			}else if(this.app.loopCount === 13) {
+				liWidget = registry.byId("dojox_mobile_ListItem_15"); //Test Instructions
+			}
+			if(liWidget){
+				var ev = new TransitionEvent(liWidget.domNode, liWidget.params);
+				ev.dispatch();
+			}
 		},
 		beforeDeactivate: function(){
 			//console.log(MODULE+" beforeDeactivate");

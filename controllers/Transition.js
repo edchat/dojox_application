@@ -14,7 +14,6 @@ define(["require", "dojo/_base/lang", "dojo/_base/declare", "dojo/has", "dojo/on
 		proceeding: false,
 
 		waitingQueue:[],
-		lastSubChildMatch: null,
 
 		constructor: function(app, events){
 			// summary:
@@ -47,6 +46,7 @@ define(["require", "dojo/_base/lang", "dojo/_base/declare", "dojo/has", "dojo/on
 			// event: Object
 			//		"app-transition" event parameter. It should be like: {"viewId": viewId, "opts": opts}
 			var F = MODULE+":transition";
+			this.translog(F,"New Transition event.viewId=[",event.viewId,"]");
 			this.app.log(F+" event.viewId=[",event.viewId,"], event.opts=",event.opts);
 
 			var viewsId = event.viewId || "";
@@ -361,11 +361,11 @@ define(["require", "dojo/_base/lang", "dojo/_base/declare", "dojo/has", "dojo/on
 				//activate or deactivate views and refresh layout.
 
 				if(current && current._active){
-					this._handleBeforeDeactivateCalls(currentSubViewArray, next, current, data, subIds);
+					this._handleBeforeDeactivateCalls(currentSubViewArray, this.nextLastSubChildMatch || next, current, data, subIds);
 				}
 				if(next){
 					this.app.log(F+" calling _handleBeforeActivateCalls next name=[",next.name,"], parent.name=[",next.parent.name,"]");
-					this._handleBeforeActivateCalls(nextSubViewArray, current, data, subIds);
+					this._handleBeforeActivateCalls(nextSubViewArray, this.currentLastSubChildMatch || current, data, subIds);
 				}
 				if(!removeView){
 					this.app.log(F+" calling _handleLayoutAndResizeCalls");
@@ -389,8 +389,8 @@ define(["require", "dojo/_base/lang", "dojo/_base/declare", "dojo/has", "dojo/on
 					}
 
 					// Add call to handleAfterDeactivate and handleAfterActivate here!
-					this._handleAfterDeactivateCalls(currentSubViewArray, next, current, data, subIds);
-					this._handleAfterActivateCalls(nextSubViewArray, removeView, current, data, subIds);
+					this._handleAfterDeactivateCalls(currentSubViewArray, this.nextLastSubChildMatch || next, current, data, subIds);
+					this._handleAfterActivateCalls(nextSubViewArray, removeView, this.currentLastSubChildMatch || current, data, subIds);
 				}));
 				return result; // dojo/promise/all
 			}
@@ -401,13 +401,13 @@ define(["require", "dojo/_base/lang", "dojo/_base/declare", "dojo/has", "dojo/on
 			//		Called when the current views and the next views match
 			var F = MODULE+":_handleMatchingViews";
 
-			this._handleBeforeDeactivateCalls(subs, next, current, data, subIds);
+			this._handleBeforeDeactivateCalls(subs, this.nextLastSubChildMatch || next, current, data, subIds);
 			// this is the order that things were being done before on a reload of the same views, so I left it
 			// calling _handleAfterDeactivateCalls here instead of after _handleLayoutAndResizeCalls
-			this._handleAfterDeactivateCalls(subs, next, current, data, subIds);
-			this._handleBeforeActivateCalls(subs, current, data, subIds);
+			this._handleAfterDeactivateCalls(subs, this.nextLastSubChildMatch || next, current, data, subIds);
+			this._handleBeforeActivateCalls(subs, this.currentLastSubChildMatch || current, data, subIds);
 			this._handleLayoutAndResizeCalls(subs, removeView, doResize, subIds);
-			this._handleAfterActivateCalls(subs, removeView, current, data, subIds);
+			this._handleAfterActivateCalls(subs, removeView, this.currentLastSubChildMatch || current, data, subIds);
 		},
 
 		_handleBeforeDeactivateCalls: function(subs, next, current, /*parent,*/ data, /*removeView, doResize,*/ subIds/*, currentSubNames*/){
