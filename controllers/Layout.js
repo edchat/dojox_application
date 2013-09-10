@@ -127,10 +127,8 @@ function(declare, lang, array, win, query, domGeom, domAttr, domStyle, registry,
 			// |		{"parent":parent, "view":view, "removeView": boolean}
 			if(event.view){
 				this.inherited(arguments);
-				// do selected view layout
-				// call _doResize for parent and view here, doResize will no longer call it for all children.
 
-				// it seems like we should be able to minimize calls to resize by passing doResize: false and only doing resize on the app-resize emit//
+				// normally when called from transition doResize will be false, and the resize will only be done when the app-resize event is fired
 				if(event.doResize){
 					this._doResize(event.parent || this.app);
 					this._doResize(event.view);
