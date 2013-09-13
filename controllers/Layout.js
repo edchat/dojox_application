@@ -127,7 +127,6 @@ function(declare, lang, array, win, query, domGeom, domAttr, domStyle, registry,
 			// |		{"parent":parent, "view":view, "removeView": boolean}
 			if(event.view){
 				this.inherited(arguments);
-
 				// normally when called from transition doResize will be false, and the resize will only be done when the app-resize event is fired
 				if(event.doResize){
 					this._doResize(event.parent || this.app);

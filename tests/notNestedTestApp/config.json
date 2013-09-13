@@ -77,8 +77,15 @@
 
 	// these are the possible transitions, 
 	// if a transition is set on a view or parent it will override the transition set on the transitionEvent or the defaultTransition in the config.
-	"transition": "slide",
-	"logTransitions": 1,
+	"defaultTransition": "slide",
+
+	"appLogging": {
+		"logAll": 0,
+		"logTimeStamp": 0,
+		"loggingList": [
+			"logTransitions:"
+		]
+	},
 	"timedAutoFlow": 1,
 	"timed100Loops": 0,
 
@@ -114,31 +121,37 @@
 			,"constraint" : "center"
 		},
 		"V1": {
+			"defaultTransition": "slide",
 			"template": "notNestedTestApp/views/V1.html",
 			"controller": "notNestedTestApp/views/V1.js"
 			,"constraint" : "center"
 		},
 		"V3": {
+			"defaultTransition": "none",
 			"template": "notNestedTestApp/views/V3.html",
 			"controller": "notNestedTestApp/views/V3.js"
 			,"constraint" : "center"
 		},
 		"V2": {
+			"defaultTransition": "fade",
 			"controller": "notNestedTestApp/views/V2.js",
 			"template": "notNestedTestApp/views/V2.html"
 			,"constraint" : "center"
 		},
 		"V4": {
+			"transition": "flip",
 			"controller": "notNestedTestApp/views/V4.js",
 			"template": "notNestedTestApp/views/V4.html"
 			,"constraint" : "center"
 		},
 		"V5": {
+			"defaultTransition": "slide",
 			"controller": "notNestedTestApp/views/V5.js",
 			"template": "notNestedTestApp/views/V5.html"
 			,"constraint" : "center"
 		},
 		"V6": {
+			"defaultTransition": "slide",
 			"constraint" : "right",
 			"controller": "notNestedTestApp/views/V6.js",
 			"template": "notNestedTestApp/views/V6.html"

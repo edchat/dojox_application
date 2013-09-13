@@ -75,10 +75,17 @@
 		}
 	},	
 
-	// these are the possible transitions, 
+	// these are the possible transitions,
 	// if a transition is set on a view or parent it will override the transition set on the transitionEvent or the defaultTransition in the config.
-	"transition": "slide",
-	"logTransitions": 1,
+	"defaultTransition": "slide",
+
+	"appLogging": {
+		"logAll": 0,
+		"logTimeStamp": 0,
+		"loggingList": [
+			"logTransitions:"
+		]
+	},
 	"timedAutoFlow": 1,
 	"timed100Loops": 0,
 
@@ -96,6 +103,7 @@
 			}
 		},
 		"P1": {
+			"defaultTransition": "slide",
 			"controller": "nestedTestApp/views/P1.js",
 			"template": "nestedTestApp/views/P1.html",
 			"views": {
@@ -105,15 +113,16 @@
 					"defaultView": "V1",
 					"views": {
 						"TestInfo": {
-							"transition": "none",
 							"template": "nestedTestApp/views/TestInfo.html",
 							"controller": "nestedTestApp/views/TestInfo.js"
 						},
 						"V1": {
+							"transition": "flip",
 							"template": "nestedTestApp/views/V1.html",
 							"controller": "nestedTestApp/views/V1.js"
 						},
 						"V3": {
+							"transition": "none",
 							"template": "nestedTestApp/views/V3.html",
 							"controller": "nestedTestApp/views/V3.js"
 						},
@@ -127,14 +136,17 @@
 			}
 		},
 		"V2": {
+			"defaultTransition": "fade",
 			"controller": "nestedTestApp/views/V2.js",
 			"template": "nestedTestApp/views/V2.html"
 		},
 		"V4": {
+			"transition": "flip",
 			"controller": "nestedTestApp/views/V4.js",
 			"template": "nestedTestApp/views/V4.html"
 		},
 		"P2": {
+			"defaultTransition": "slide",
 			"views": {
 				"S2": {
 					"views": {

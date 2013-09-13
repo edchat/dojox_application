@@ -2,10 +2,8 @@ define(["require", "dojo/_base/kernel", "dojo/_base/lang", "dojo/_base/declare",
 	"dojo/_base/window", "dojo/Evented", "dojo/Deferred", "dojo/when", "dojo/has", "dojo/on", "dojo/ready",
 	"dojo/dom-construct", "dojo/dom-attr", "./utils/model", "./utils/nls", "./module/lifecycle",
 	"./utils/hash", "./utils/constraints", "./utils/config"],
-	function(require, kernel, lang, declare, config, win, Evented, Deferred, when, has, on, ready, domConstruct, domAttr,
+	function(require, kernel, lang, declare, dconfig, win, Evented, Deferred, when, has, on, ready, domConstruct, domAttr,
 		 model, nls, lifecycle, hash, constraints, configUtils){
-
-	has.add("app-log-api", (config["app"] || {}).debugApp);
 
 	var Application = declare(Evented, {
 		constructor: function(params, node){
@@ -305,7 +303,14 @@ define(["require", "dojo/_base/kernel", "dojo/_base/lang", "dojo/_base/declare",
 			ready(function(){
 				var app = new App(config, node || win.body());
 
-				if(has("app-log-api")){
+				// setup logging
+				app.appLogging = app.appLogging || {};
+				app.appLogging.loggingList = app.appLogging.loggingList || [];
+
+				has.add("app-log-api", ((dconfig["app"] || {}).debugApp)  || app.appLogging["logAll"]);
+				has.add("app-log-partial", app.appLogging.loggingList.length > 0);
+
+				if(has("app-log-api") || has("app-log-partial")){
 					app.log = function(){
 						// summary:
 						//		If config is set to turn on app logging, then log msg to the console
@@ -313,15 +318,29 @@ define(["require", "dojo/_base/kernel", "dojo/_base/lang", "dojo/_base/declare",
 						// arguments: 
 						//		the message to be logged, 
 						//		all but the last argument will be treated as Strings and be concatenated together, 
-						//      the last argument can be an object it will be added as an argument to the console.log 						
+						//      the last argument can be an object it will be added as an argument to the console.log
 						var msg = "";
-						try{
-							for(var i = 0; i < arguments.length-1; i++){
-								msg = msg + arguments[i];
-							}
-							console.log(msg,arguments[arguments.length-1]);
-						}catch(e){}
+						if(app.appLogging.logTimeStamp){
+							msg = msg+new Date().getTime()+" ";;
+						}
+						if(has("app-log-api") || app.appLogging["logAll"]){  // log all messages
+							try{
+								for(var i = 0; i < arguments.length-1; i++){
+									msg = msg + arguments[i] + " ";
+								}
+								console.log(msg,arguments[arguments.length-1]);
+							}catch(e){}
+						} else if (has("app-log-partial")){  // only log specific things
+							try{
+								if(app.appLogging.loggingList.indexOf(arguments[0]) > -1){ // if the 1st arg is in the loggingList log it
+									for(var i = 2; i < arguments.length-1; i++){
+										msg = msg + arguments[i];
+									}
+									console.log(msg,arguments[arguments.length-1]);
+								}
+							}catch(e){}
 
+						}
 					};
 				}else{
 					app.log = function(){}; // noop

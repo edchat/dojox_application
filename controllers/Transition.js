@@ -4,6 +4,7 @@ define(["require", "dojo/_base/lang", "dojo/_base/declare", "dojo/has", "dojo/on
 
 	var transit;
 	var MODULE = "app/controllers/Transition";
+	var LOGKEY = "logTransitions:";
 
 	// module:
 	//		dojox/app/controllers/Transition
@@ -46,8 +47,8 @@ define(["require", "dojo/_base/lang", "dojo/_base/declare", "dojo/has", "dojo/on
 			// event: Object
 			//		"app-transition" event parameter. It should be like: {"viewId": viewId, "opts": opts}
 			var F = MODULE+":transition";
-			this.translog(F,"New Transition event.viewId=[",event.viewId,"]");
-			this.app.log(F+" event.viewId=[",event.viewId,"], event.opts=",event.opts);
+			this.app.log(LOGKEY,F,"New Transition event.viewId=["+event.viewId+"]");
+			this.app.log(F,"event.viewId=["+event.viewId+"]","event.opts=",event.opts);
 
 			var viewsId = event.viewId || "";
 			this.proceedingSaved = this.proceeding;	
@@ -186,7 +187,7 @@ define(["require", "dojo/_base/lang", "dojo/_base/declare", "dojo/has", "dojo/on
 			});
 		},
 
-		_getTransition: function(parent, transitionTo, opts){
+		_getTransition: function(nextView, parent, transitionTo, opts){
 			// summary:
 			//		Get view's transition type from the config for the view or from the parent view recursively.
 			//		If not available use the transition option otherwise get view default transition type in the
@@ -203,13 +204,16 @@ define(["require", "dojo/_base/lang", "dojo/_base/declare", "dojo/has", "dojo/on
 			//		transition type like "slide", "fade", "flip" or "none".
 			var parentView = parent;
 			var transition = null;
-			if(parentView.views[transitionTo]){
+			if(nextView){
+				transition = nextView.transition;
+			}
+			if(!transition && parentView.views[transitionTo]){
 				transition = parentView.views[transitionTo].transition;
 			} 
 			if(!transition){
 				transition = parentView.transition;
 			}
-			var defaultTransition = parentView.defaultTransition;
+			var defaultTransition = (nextView && nextView.defaultTransition) ?  nextView.defaultTransition : parentView.defaultTransition;
 			while(!transition && parentView.parent){
 				parentView = parentView.parent;
 				transition = parentView.transition;
@@ -281,7 +285,7 @@ define(["require", "dojo/_base/lang", "dojo/_base/declare", "dojo/has", "dojo/on
 				throw Error("view parent not found in transition.");
 			}
 
-			this.app.log(F+" transitionTo=[",transitionTo,"], removeView = [",removeView,"] parent.name=[",parent.name,"], opts=",opts);
+			this.app.log(F+" transitionTo=[",transitionTo,"], removeView=[",removeView,"] parent.name=[",parent.name,"], opts=",opts);
 
 			var parts, toId, subIds, next;
 			if(transitionTo){
@@ -327,7 +331,7 @@ define(["require", "dojo/_base/lang", "dojo/_base/declare", "dojo/has", "dojo/on
 					this.app.log(F+" called with removeView true, but that view is not available to remove");
 					return;	// trying to remove a view which is not showing
 				}	
-				this.translog(F,"Transition Remove current From="+currentSubNames);
+				this.app.log(LOGKEY,F,"Transition Remove current From=["+currentSubNames+"]");
 				// if next == current we will set next to null and remove the view with out a replacement
 				next = null;
 			}
@@ -342,11 +346,11 @@ define(["require", "dojo/_base/lang", "dojo/_base/declare", "dojo/has", "dojo/on
 			}
 
 			if(nextSubNames == currentSubNames && next == current){ // new test to see if current matches next
-				this.translog(F,"Transition current and next DO MATCH From="+currentSubNames+" TO="+nextSubNames);
+				this.app.log(LOGKEY,F,"Transition current and next DO MATCH From=["+currentSubNames+"] TO=["+nextSubNames+"]");
 				this._handleMatchingViews(nextSubViewArray, next, current, parent, data, removeView, doResize, subIds, currentSubNames);
 
 			}else{
-				this.translog(F,"Transition current and next DO NOT MATCH From="+currentSubNames+" TO="+nextSubNames);
+				this.app.log(LOGKEY,F,"Transition current and next DO NOT MATCH From=["+currentSubNames+"] TO=["+nextSubNames+"]");
 				//When clicking fast, history module will cache the transition request que
 				//and prevent the transition conflicts.
 				//Originally when we conduct transition, selectedChild will not be the
@@ -419,7 +423,7 @@ define(["require", "dojo/_base/lang", "dojo/_base/declare", "dojo/has", "dojo/on
 				for(var i = subs.length-1; i >= 0; i--){
 					var v = subs[i];
 					if(v && v.beforeDeactivate && v._active){
-						this.translog(F,"beforeDeactivate for v.id ="+v.id);
+						this.app.log(LOGKEY,F,"beforeDeactivate for v.id="+v.id);
 						v.beforeDeactivate(next, data);
 					}
 				}
@@ -435,7 +439,7 @@ define(["require", "dojo/_base/lang", "dojo/_base/declare", "dojo/has", "dojo/on
 				for(var i = 0; i < subs.length; i++){
 					var v = subs[i];
 					if(v && v.beforeDeactivate && v._active){
-						this.translog(F,"afterDeactivate for v.id ="+v.id);
+						this.app.log(LOGKEY,F,"afterDeactivate for v.id="+v.id);
 						v.afterDeactivate(next, data);
 						v._active = false;
 					}
@@ -451,7 +455,7 @@ define(["require", "dojo/_base/lang", "dojo/_base/declare", "dojo/has", "dojo/on
 			//now we need to loop backwards thru subs calling beforeActivate (ok since next matches current)
 			for(var i = subs.length-1; i >= 0; i--){
 				var v = subs[i];
-				this.translog(F,"beforeActivate for v.id ="+v.id);
+				this.app.log(LOGKEY,F,"beforeActivate for v.id="+v.id);
 				v.beforeActivate(current, data);
 			}
 		},
@@ -463,13 +467,13 @@ define(["require", "dojo/_base/lang", "dojo/_base/declare", "dojo/has", "dojo/on
 			var remove = removeView;
 			for(var i = 0; i < subs.length; i++){
 				var v = subs[i];
-				this.translog(F,"emit layoutView v.id=["+v.id+"] removeView = ["+remove+"]");
+				this.app.log(LOGKEY,F,"emit layoutView v.id=["+v.id+"] removeView=["+remove+"]");
 				// it seems like we should be able to minimize calls to resize by passing doResize: false and only doing resize on the app-resize emit
 				this.app.emit("app-layoutView", {"parent": v.parent, "view": v, "removeView": remove, "doResize": false});
 				remove = false;
 			}
 			if(doResize){
-				this.translog(F,"emit doResize called");
+				this.app.log(LOGKEY,F,"emit doResize called");
 				this.app.emit("app-resize"); // after last layoutView fire app-resize
 			}
 		},
@@ -486,7 +490,7 @@ define(["require", "dojo/_base/lang", "dojo/_base/declare", "dojo/has", "dojo/on
 			for(var i = startInt; i < subs.length; i++){
 				var v = subs[i];
 				if(v.afterActivate){
-					this.translog(F,"afterActivate for v.id ="+v.id);
+					this.app.log(LOGKEY,F,"afterActivate for v.id="+v.id);
 					v.afterActivate(current, data);
 					v._active = true;
 				}
@@ -620,47 +624,25 @@ define(["require", "dojo/_base/lang", "dojo/_base/declare", "dojo/has", "dojo/on
 			//		the promise returned by the call to transit
 			var F = MODULE+":_handleTransit";
 
+			var nextLastSubChild = this.nextLastSubChildMatch || next;
+
 			var mergedOpts = lang.mixin({}, opts); // handle reverse from mergedOpts or transitionDir
 			mergedOpts = lang.mixin({}, mergedOpts, {
 				reverse: (mergedOpts.reverse || mergedOpts.transitionDir === -1)?true:false,
 				// if transition is set for the view (or parent) in the config use it, otherwise use it from the event or defaultTransition from the config
-				transition: this._getTransition(parent, toId, mergedOpts)
+				transition: this._getTransition(nextLastSubChild, parent, toId, mergedOpts)
 			});
 
-			var nextLastSubChild = this.nextLastSubChildMatch || next;
 			if(removeView){
 				nextLastSubChild = null;
 			}
 			if(currentLastSubChild){
-				this.translog(F,"transit FROM currentLastSubChild.id ="+currentLastSubChild.id);
+				this.app.log(LOGKEY,F,"transit FROM currentLastSubChild.id=["+currentLastSubChild.id+"]");
 			}
 			if(nextLastSubChild){
-				this.translog(F,"transit TO nextLastSubChild.id ="+nextLastSubChild.id);
+				this.app.log(LOGKEY,F,"transit TO nextLastSubChild.id=["+nextLastSubChild.id+"] transition=["+mergedOpts.transition+"]");
 			}
 			return transit(currentLastSubChild && currentLastSubChild.domNode, nextLastSubChild && nextLastSubChild.domNode, mergedOpts);
-		},
-
-		translog: function(){
-			// summary:
-			//		If config is set to turn on translog or app logging, then log msg to the console
-			//
-			// arguments:
-			//		the message to be logged,
-			//		all but the last argument will be treated as Strings and be concatenated together,
-			//      the last argument can be an object it will be added as an argument to the console.log
-			if(!(has("app-log-api") || this.app.logTransitions)){
-				return;
-			}
-			var msg = "";
-			try{
-				if(has("app-log-api")){ // only include the function if normal app-log-api is true
-					msg = msg + arguments[0];
-				}
-				for(var i = 1; i < arguments.length-1; i++){
-					msg = msg + arguments[i];
-				}
-				console.log(msg,arguments[arguments.length-1]);
-			}catch(e){}
 		}
 
 	});
