@@ -57,7 +57,9 @@ function(declare, lang, array, win, query, domGeom, domAttr, domStyle, registry,
 			this.app.log("in app/controllers/Layout.initLayout event=",event);
 			this.app.log("in app/controllers/Layout.initLayout event.view.parent.name=[",event.view.parent.name,"]");
 
-			event.view.parent.domNode.appendChild(event.view.domNode);
+			if (!event.view.domNode.parentNode) {
+				event.view.parent.domNode.appendChild(event.view.domNode);
+			}
 
 			domAttr.set(event.view.domNode, "data-app-constraint", event.view.constraint);
 

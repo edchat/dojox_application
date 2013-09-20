@@ -131,10 +131,15 @@ define(["require", "dojo/_base/lang", "dojo/_base/declare", "dojo/on", "dojo/Def
 			var subIds = parts.join(",");
 			var params = event.params || "";
 
+			this.handleDefault = false;
+			this.defaultHasPlus = false;
 			var def = this.loadChild(parent, childId, subIds, params);
 			// call Load event callback
 			if(event.callback){
-				when(def, event.callback);
+				this.event = event;
+				when(def, lang.hitch(this, function(){
+					this.event.callback(this.handleDefault, this.defaultHasPlus);
+				}))
 			}
 			return def;
 		},
@@ -157,7 +162,7 @@ define(["require", "dojo/_base/lang", "dojo/_base/declare", "dojo/on", "dojo/Def
 			var id = parent.id + '_' + childId;
 			
 			// check for possible default params if no params were provided
-			if(!params && parent.views[childId].defaultParams){
+			if(!params && parent.views[childId] && parent.views[childId].defaultParams){
 				params = parent.views[childId].defaultParams;
 			}
 			var view = parent.children[id];
@@ -228,16 +233,27 @@ define(["require", "dojo/_base/lang", "dojo/_base/declare", "dojo/on", "dojo/Def
 			// returns:
 			//		A dojo/Deferred instance which will be resolved when all views loaded.
 
-			//TODO: Can this be called with a viewId or default view which includes multiple views with a "+"?  Need to handle that!
-
 			if(!parent){
 				throw Error("No parent for Child '" + childId + "'.");
 			}
 
 			if(!childId){
 				var parts = parent.defaultView ? parent.defaultView.split(",") : "default";
-				childId = parts.shift();
-				subIds = parts.join(',');
+				if(parent.defaultView){ // in this case we need to call transfer to handle the defaultView calls to activate
+					var childViews = this._getViewNamesFromDefaults(child);
+					this.handleDefault = true;
+					if(parent.defaultView.indexOf("+") >= 0){
+						this.defaultHasPlus = true;
+					}
+					this.app.log("logTransitions:","","emit app-transition parent.defaultView childViews=["+childViews+"]");
+					this.app.emit("app-transition", {
+						viewId: childViews,
+						opts: { params: params }
+					});
+				}else{
+					childId = parts.shift();
+					subIds = parts.join(',');
+				}
 			}
 
 			var loadChildDeferred = new Deferred();
@@ -251,7 +267,20 @@ define(["require", "dojo/_base/lang", "dojo/_base/declare", "dojo/on", "dojo/Def
 			when(createPromise, lang.hitch(this, function(child){
 				// if no subIds and current view has default view, load the default view.
 				if(!subIds && child.defaultView){
-					subIds = child.defaultView;
+					if(child.defaultView){ // in this case we need to call transfer to handle the defaultView activate
+						var childViews = this._getViewNamesFromDefaults(child);
+						this.app.log("logTransitions:","","emit app-transition child.defaultView childViews=["+childViews+"]");
+						this.handleDefault = true;
+						if(child.defaultView.indexOf("+") >= 0){
+							this.defaultHasPlus = true;
+						}
+						this.app.emit("app-transition", {
+							viewId: childViews,
+							opts: { params: params }
+						});
+					}else{
+						subIds = child.defaultView;
+					}
 				}
 
 				var parts = subIds.split(',');
@@ -273,6 +302,29 @@ define(["require", "dojo/_base/lang", "dojo/_base/declare", "dojo/on", "dojo/Def
 				loadChildDeferred.reject("load child '"+childId+"' error.")
 			});
 			return loadChildDeferred.promise; // dojo/Deferred.promise
+		},
+
+		_getViewNamesFromDefaults: function(view){
+			// summary:
+			//		Build the full nested view name from the view and its defaultView(s)
+			//
+			// view: Object
+			//		the view with defaultViews to process
+			// returns:
+			//		A string with the full nested view names
+			var parent = view.parent;
+			var parentNames = view.name;
+			var viewNames = "";
+			while(parent !== this.app){
+				parentNames = parent.name+","+parentNames;
+				parent = parent.parent;
+			}
+			var parts = view.defaultView.split('+');
+			for(var item in parts){
+				parts[item] = parentNames+","+parts[item];
+			}
+			viewNames = parts.join('+');
+			return viewNames;
 		}
 	});
 });

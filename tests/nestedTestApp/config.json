@@ -107,11 +107,13 @@
 			"defaultTransition": "slide",
 			"controller": "nestedTestApp/views/P1.js",
 			"template": "nestedTestApp/views/P1.html",
+			"defaultView": "S1",
 			"views": {
 				"S1": {
 					"template": "nestedTestApp/views/S1.html",
 					"controller": "nestedTestApp/views/S1.js",
 					"defaultView": "V1",
+					//"defaultView": "V1+V8",
 					"views": {
 						"TestInfo": {
 							"template": "nestedTestApp/views/TestInfo.html",
