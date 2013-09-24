@@ -12,6 +12,7 @@ define(["dojo/_base/array"], function(arr){
 			//
 			// returns:
 			//		the selected child view for this constraint
+		//	constraint = constraint ? constraint : view.constraint;
 			var type = typeof(constraint);
 			var hash = (type == "string" || type == "number") ? constraint : constraint.__hash;
 			return (view && view.selectedChildren && view.selectedChildren[hash]) ?

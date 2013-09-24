@@ -6,7 +6,7 @@ define(["require", "dojo/_base/lang", "dojo/_base/declare", "dojo/on", "dojo/Def
 	//		Bind "app-load" event on dojox/app application instance.
 	//		Load child view and sub children at one time.
 
-	return declare("dojox.app.controllers.Load", Controller, {
+	return declare(Controller, {
 
 
 		_waitingQueue:[],
@@ -50,7 +50,7 @@ define(["require", "dojo/_base/lang", "dojo/_base/declare", "dojo/on", "dojo/Def
 			//		LoadArray event parameter. It should be like this: {"parent":parent, "viewId":viewId, "viewArray":viewArray, "callback":function(){...}}
 			// returns:
 			//		A dojo/Deferred object.
-			//		The return value cannot return directly. 
+			//		The return value cannot return directly.
 			//		If the caller need to use the return value, pass callback function in event parameter and process return value in callback function.
 
 			this.app.log("in app/controllers/Load event.viewId="+event.viewId+" event =", event);
@@ -58,7 +58,7 @@ define(["require", "dojo/_base/lang", "dojo/_base/declare", "dojo/on", "dojo/Def
 			var viewArray = [];
 			// create an array from the diff views in event.viewId (they are separated by +)
 			var parts = views.split('+');
-			while(parts.length > 0){ 	
+			while(parts.length > 0){
 				var viewId = parts.shift();
 				viewArray.push(viewId);
 			}
@@ -86,7 +86,7 @@ define(["require", "dojo/_base/lang", "dojo/_base/declare", "dojo/on", "dojo/Def
 				return def;
 			}
 		},
-		
+
 		proceedLoadView: function(loadEvt){
 			// summary:
 			//		Proceed load queue by FIFO by default.
@@ -121,7 +121,7 @@ define(["require", "dojo/_base/lang", "dojo/_base/declare", "dojo/on", "dojo/Def
 			//		Load event parameter. It should be like this: {"parent":parent, "viewId":viewId, "callback":function(){...}}
 			// returns:
 			//		A dojo/Deferred object.
-			//		The return value cannot return directly. 
+			//		The return value cannot return directly.
 			//		If the caller need to use the return value, pass callback function in event parameter and process return value in callback function.
 
 			var parent = event.parent || this.app;
@@ -133,11 +133,18 @@ define(["require", "dojo/_base/lang", "dojo/_base/declare", "dojo/on", "dojo/Def
 
 			this.handleDefault = false;
 			this.defaultHasPlus = false;
+			this.event = event;
 			var def = this.loadChild(parent, childId, subIds, params);
 			// call Load event callback
 			if(event.callback){
 				this.event = event;
 				when(def, lang.hitch(this, function(){
+					if(this.handleDefault){
+						this.app.emit("app-transition", {
+							viewId: this.childViews,
+							opts: { params: params }
+						});
+					}
 					this.event.callback(this.handleDefault, this.defaultHasPlus);
 				}))
 			}
@@ -158,9 +165,10 @@ define(["require", "dojo/_base/lang", "dojo/_base/declare", "dojo/on", "dojo/Def
 			// returns:
 			//		If view exist, return the view object.
 			//		Otherwise, create the view and return a dojo.Deferred instance.
+			console.log("in createChild called for childId ["+childId+"] subIds=["+subIds+"]")
 
 			var id = parent.id + '_' + childId;
-			
+
 			// check for possible default params if no params were provided
 			if(!params && parent.views[childId] && parent.views[childId].defaultParams){
 				params = parent.views[childId].defaultParams;
@@ -179,9 +187,11 @@ define(["require", "dojo/_base/lang", "dojo/_base/declare", "dojo/on", "dojo/Def
 			when(this.createView(parent, id, childId, null, params, parent.views[childId].type), function(newView){
 				parent.children[id] = newView;
 				when(newView.start(), function(view){
+					console.log("in createChild after .start calling def.resolve() for view ["+view.id+"]")
 					def.resolve(view);
 				});
 			});
+			console.log("in createChild returning def for ["+childId+"] subIds=["+subIds+"]");
 			return def;
 		},
 
@@ -204,6 +214,7 @@ define(["require", "dojo/_base/lang", "dojo/_base/declare", "dojo/on", "dojo/Def
 			//		A dojo/Deferred instance which will be resolved when the view will be instantiated.
 			// tags:
 			//		protected
+			console.log("in createView called for id ["+id+"] name=["+name+"]");
 			var def = new Deferred();
 			var app = this.app;
 			require([type?type:"../View"], function(View){
@@ -213,6 +224,7 @@ define(["require", "dojo/_base/lang", "dojo/_base/declare", "dojo/on", "dojo/Def
 					"name": name,
 					"parent": parent
 				}, { "params": params }, mixin));
+				console.log("in createView calling def.resolve for newView ["+newView.id+"] newView.name=["+newView.name+"]")
 				def.resolve(newView);
 			});
 			return def;
@@ -254,7 +266,9 @@ define(["require", "dojo/_base/lang", "dojo/_base/declare", "dojo/on", "dojo/Def
 					childId = parts.shift();
 					subIds = parts.join(',');
 				}
+
 			}
+			console.log("in loadChild called for childId ["+childId+"] subIds=["+subIds+"]");
 
 			var loadChildDeferred = new Deferred();
 			var createPromise;
@@ -265,42 +279,53 @@ define(["require", "dojo/_base/lang", "dojo/_base/declare", "dojo/on", "dojo/Def
 				return loadChildDeferred.promise;
 			}
 			when(createPromise, lang.hitch(this, function(child){
+				console.log("in loadChild back from createPromise for child.id ["+child.id+"]");
 				// if no subIds and current view has default view, load the default view.
-				if(!subIds && child.defaultView){
-					if(child.defaultView){ // in this case we need to call transfer to handle the defaultView activate
+				if(!subIds && child.defaultView){ // in this case we need to call transfer to handle the defaultView activate
+				//	if(child.defaultView){
 						var childViews = this._getViewNamesFromDefaults(child);
 						this.app.log("logTransitions:","","emit app-transition child.defaultView childViews=["+childViews+"]");
 						this.handleDefault = true;
 						if(child.defaultView.indexOf("+") >= 0){
 							this.defaultHasPlus = true;
 						}
-						this.app.emit("app-transition", {
-							viewId: childViews,
-							opts: { params: params }
-						});
-					}else{
-						subIds = child.defaultView;
-					}
+						this.childViews = childViews;
+					//	this.app.emit("app-transition", {
+					//		viewId: childViews,
+					//		opts: { params: params }
+					//	});
+						console.log("loadChildDeferred.resolve() AAA line 290 ["+child.id+"] subIds=["+subIds+"]");
+						loadChildDeferred.resolve();
+
+				//	}else{
+				//		subIds = child.defaultView;
+				//	}
 				}
 
 				var parts = subIds.split(',');
 				childId = parts.shift();
 				subIds = parts.join(',');
 				if(childId){
+					console.log("in loadChild calling subLoadDeferred = this.loadChild for child.id ["+child.id+"] subIds=["+subIds+"]");
 					var subLoadDeferred = this.loadChild(child, childId, subIds, params);
 					when(subLoadDeferred, function(){
+						console.log("loadChildDeferred.resolve() 1 line 294 ["+childId+"] subIds=["+subIds+"]");
 						loadChildDeferred.resolve();
 					},
 					function(){
+						console.log("loadChildDeferred.REJECT() for ["+childId+"] subIds=["+subIds+"]");
 						loadChildDeferred.reject("load child '"+childId+"' error.");
 					});
 				}else{
+					console.log("loadChildDeferred.resolve() 2 line 302 ["+childId+"] subIds=["+subIds+"]");
 					loadChildDeferred.resolve();
 				}
 			}),
 			function(){
+				console.log("loadChildDeferred.REJECT() for ["+childId+"] subIds=["+subIds+"]");
 				loadChildDeferred.reject("load child '"+childId+"' error.")
 			});
+			console.log("loadChildDeferred.promise returned for ["+childId+"] subIds=["+subIds+"]");
 			return loadChildDeferred.promise; // dojo/Deferred.promise
 		},
 

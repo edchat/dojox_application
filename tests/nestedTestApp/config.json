@@ -39,6 +39,7 @@
 		"dojox/app/controllers/Load",
 		"dojox/app/controllers/Transition",
 		"dojox/app/controllers/Layout"
+	//	,"nestedTestApp/controllers/CustomLoaderDefaults"
 		,"nestedTestApp/controllers/CustomLogger"
 	],
 
@@ -60,8 +61,9 @@
 		"!phone" : {
 			"template": "nestedTestApp/views/tablet/ViewScrollableLists.html",
 			"controller": "nestedTestApp/views/tablet/ViewScrollableLists",
-		//	"defaultView": "P1,S1,V1"
-			"defaultView": "V2"
+			"defaultView": "P1,S1,V8"
+		//	"defaultView": "P1"
+		//	"defaultView": "V2"
 		//	"defaultView": "P2,S2,Ss2,V5+P2,S2,Ss2,V6"
 		},
 		"ie9orLess" : {
@@ -87,7 +89,7 @@
 			"logTransitions:"
 		]
 	},
-	"timedAutoFlow": 1,
+	"timedAutoFlow": 0,
 	"timed100Loops": 0,
 
 	//views are groups of views and models loaded at once
@@ -112,8 +114,8 @@
 				"S1": {
 					"template": "nestedTestApp/views/S1.html",
 					"controller": "nestedTestApp/views/S1.js",
-					"defaultView": "V1",
-					//"defaultView": "V1+V8",
+					//"defaultView": "V1",
+					"defaultView": "V1+V8",
 					"views": {
 						"TestInfo": {
 							"template": "nestedTestApp/views/TestInfo.html",

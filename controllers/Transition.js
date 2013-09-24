@@ -10,7 +10,7 @@ define(["require", "dojo/_base/lang", "dojo/_base/declare", "dojo/has", "dojo/on
 	//		dojox/app/controllers/Transition
 	//		Bind "app-transition" event on dojox/app application instance.
 	//		Do transition from one view to another view.
-	return declare("dojox.app.controllers.Transition", Controller, {
+	return declare(Controller, {
 
 		proceeding: false,
 
@@ -173,16 +173,27 @@ define(["require", "dojo/_base/lang", "dojo/_base/declare", "dojo/has", "dojo/on
 			this.app.emit("app-load", {
 				"viewId": transitionEvt.viewId,
 				"params": params,
-				"callback": lang.hitch(this, function(){
-					var transitionDef = this._doTransition(transitionEvt.viewId, transitionEvt.opts, params, transitionEvt.opts.data, this.app, transitionEvt._removeView, transitionEvt._doResize);
-					when(transitionDef, lang.hitch(this, function(){
+				"callback": lang.hitch(this, function(needToHandleDefaultView, defaultHasPlus){
+					if(needToHandleDefaultView){ // do not process this view if needToHandleDefaultView true
 						this.proceeding = false;
 						this.processingQueue = true;
-						var nextEvt = this.waitingQueue.shift();
+						// use pop instead of shift here to get the last event for the defaultView when the default does not have a +
+						// use shift when it has a + or the defaults will be out of order but it can move the default to be after other views if we are processing views with a +
+						var nextEvt = (defaultHasPlus) ? this.waitingQueue.shift() : this.waitingQueue.pop();
 						if(nextEvt){
 							this.proceedTransition(nextEvt);
 						}
-					}));
+					}else{
+						var transitionDef = this._doTransition(transitionEvt.viewId, transitionEvt.opts, params, transitionEvt.opts.data, this.app, transitionEvt._removeView, transitionEvt._doResize);
+						when(transitionDef, lang.hitch(this, function(){
+							this.proceeding = false;
+							this.processingQueue = true;
+							var nextEvt = this.waitingQueue.shift();
+							if(nextEvt){
+								this.proceedTransition(nextEvt);
+							}
+						}));
+					}
 				})
 			});
 		},
