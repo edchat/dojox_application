@@ -1,5 +1,5 @@
-define(["require", "dojo/_base/lang", "dojo/_base/declare", "dojo/on", "dojo/Deferred", "dojo/when", "../Controller"],
-	function(require, lang, declare, on, Deferred, when, Controller, View){
+define(["require", "dojo/_base/lang", "dojo/_base/declare", "dojo/on", "dojo/Deferred", "dojo/when", "dojo/dom-style", "../Controller"],
+	function(require, lang, declare, on, Deferred, when, domStyle, Controller, View){
 	// module:
 	//		dojox/app/controllers/Load
 	// summary:
@@ -167,6 +167,7 @@ define(["require", "dojo/_base/lang", "dojo/_base/declare", "dojo/on", "dojo/Def
 					view.params = params;
 				}
 				this.app.log("in app/controllers/Load createChild view is already loaded so return the loaded view with the new parms ",view);
+				domStyle.set(view.domNode, "visibility", "hidden");
 				return view;
 			}
 			var def = new Deferred();

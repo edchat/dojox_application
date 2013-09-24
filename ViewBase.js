@@ -1,6 +1,6 @@
-define(["require", "dojo/when", "dojo/on", "dojo/dom-attr", "dojo/_base/declare", "dojo/_base/lang",
+define(["require", "dojo/when", "dojo/on", "dojo/dom-attr", "dojo/dom-style", "dojo/_base/declare", "dojo/_base/lang",
 	"dojo/Deferred", "./utils/model", "./utils/constraints"],
-	function(require, when, on, domAttr, declare, lang, Deferred, model, constraints){
+	function(require, when, on, domAttr, domStyle, declare, lang, Deferred, model, constraints){
 	return declare("dojox.app.ViewBase", null, {
 		// summary:
 		//		View base class with model & controller capabilities. Subclass must implement rendering capabilities.
@@ -140,7 +140,9 @@ define(["require", "dojo/when", "dojo/on", "dojo/dom-attr", "dojo/_base/declare"
 			// tags:
 			//		private
 
-			this._startLayout();			
+			domStyle.set(this.domNode, "visibility", "hidden");
+
+			this._startLayout();
 		},
 
 		_startLayout: function(){

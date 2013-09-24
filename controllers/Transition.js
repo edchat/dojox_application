@@ -2,6 +2,8 @@ define(["require", "dojo/_base/lang", "dojo/_base/declare", "dojo/has", "dojo/on
 	"dojo/dom-style", "../Controller", "../utils/constraints"],
 	function(require, lang, declare, has, on, Deferred, when, domStyle, Controller, constraints){
 
+//upate for nick test visibility 9/24/13
+
 	var transit;
 	var MODULE = "app/controllers/Transition";
 	var LOGKEY = "logTransitions:";
@@ -476,6 +478,13 @@ define(["require", "dojo/_base/lang", "dojo/_base/declare", "dojo/has", "dojo/on
 				this.app.log(LOGKEY,F,"emit doResize called");
 				this.app.emit("app-resize"); // after last layoutView fire app-resize
 			}
+			// Need to set visible too before transition do it here:
+			for(var i = 0; i < subs.length; i++){
+				var v = subs[i];
+				this.app.log(LOGKEY,F,"setting visibility visible for v.id=["+v.id+"]");
+				domStyle.set(v.domNode, "visibility", "visible");
+			}
+
 		},
 
 		_handleAfterActivateCalls: function(subs, removeView, current, data, subIds){
