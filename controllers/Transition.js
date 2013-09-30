@@ -137,6 +137,24 @@ define(["require", "dojo/_base/lang", "dojo/_base/declare", "dojo/has", "dojo/on
 			this.transition({ "viewId":target, opts: lang.mixin({}, evt.detail), data: evt.detail.data });
 		},
 
+		_addTransitionEventToWaitingQueue: function(transitionEvt){
+			if(transitionEvt.defaultView && this.waitingQueue.length > 0){ // need to test for defaultView to position this view correctly
+				var addedEvt = false;
+				for(var i = 0; i < this.waitingQueue.length; i++){
+					var evt = this.waitingQueue[i];
+					if(!evt.defaultView){
+						this.waitingQueue.splice(i,0,transitionEvt); // insert before first non defaultView
+						addedEvt = true;
+						break;
+					}
+				}
+				if(!addedEvt){
+					this.waitingQueue.push(transitionEvt);
+				}
+			}else{
+				this.waitingQueue.push(transitionEvt);
+			}
+		},
 		proceedTransition: function(transitionEvt){
 			// summary:
 			//		Proceed transition queue by FIFO by default.
@@ -147,8 +165,8 @@ define(["require", "dojo/_base/lang", "dojo/_base/declare", "dojo/has", "dojo/on
 			var F = MODULE+":proceedTransition";
 
 			if(this.proceeding){
-				this.app.log(F+" push event", transitionEvt);
-				this.waitingQueue.push(transitionEvt);
+				this._addTransitionEventToWaitingQueue(transitionEvt);
+				this.app.log(F+" added this event to waitingQueue", transitionEvt);
 				this.processingQueue = false;
 				return;
 			}
@@ -157,8 +175,8 @@ define(["require", "dojo/_base/lang", "dojo/_base/declare", "dojo/has", "dojo/on
 			this.app.log(F+" this.waitingQueue.length ="+ this.waitingQueue.length+ " this.processingQueue="+this.processingQueue);
 			if(this.waitingQueue.length > 0 && !this.processingQueue){
 				this.processingQueue = true;
-				this.app.log(F+" push event past proceeding", transitionEvt);
-				this.waitingQueue.push(transitionEvt);
+				this._addTransitionEventToWaitingQueue(transitionEvt);
+				this.app.log(F+" added this event to waitingQueue passed proceeding", transitionEvt);
 				transitionEvt = this.waitingQueue.shift();
 				this.app.log(F+" shifted waitingQueue to process", transitionEvt);
 			}
@@ -173,6 +191,7 @@ define(["require", "dojo/_base/lang", "dojo/_base/declare", "dojo/has", "dojo/on
 			this.app.emit("app-load", {
 				"viewId": transitionEvt.viewId,
 				"params": params,
+				"forceTransitionNone": transitionEvt.forceTransitionNone,
 				"callback": lang.hitch(this, function(needToHandleDefaultView, defaultHasPlus){
 					if(needToHandleDefaultView){ // do not process this view if needToHandleDefaultView true
 						this.proceeding = false;
@@ -184,7 +203,7 @@ define(["require", "dojo/_base/lang", "dojo/_base/declare", "dojo/has", "dojo/on
 							this.proceedTransition(nextEvt);
 						}
 					}else{
-						var transitionDef = this._doTransition(transitionEvt.viewId, transitionEvt.opts, params, transitionEvt.opts.data, this.app, transitionEvt._removeView, transitionEvt._doResize);
+						var transitionDef = this._doTransition(transitionEvt.viewId, transitionEvt.opts, params, transitionEvt.opts.data, this.app, transitionEvt._removeView, transitionEvt._doResize, transitionEvt.forceTransitionNone);
 						when(transitionDef, lang.hitch(this, function(){
 							this.proceeding = false;
 							this.processingQueue = true;
@@ -198,7 +217,7 @@ define(["require", "dojo/_base/lang", "dojo/_base/declare", "dojo/has", "dojo/on
 			});
 		},
 
-		_getTransition: function(nextView, parent, transitionTo, opts){
+		_getTransition: function(nextView, parent, transitionTo, opts, forceTransitionNone){
 			// summary:
 			//		Get view's transition type from the config for the view or from the parent view recursively.
 			//		If not available use the transition option otherwise get view default transition type in the
@@ -210,9 +229,14 @@ define(["require", "dojo/_base/lang", "dojo/_base/declare", "dojo/has", "dojo/on
 			//		view to transition to
 			//	opts: Object
 			//		transition options
+			// forceTransitionNone: boolean
+			//		true if the transition type should be forced to none, used for the initial defaultView
 			//
 			// returns:
 			//		transition type like "slide", "fade", "flip" or "none".
+			if(forceTransitionNone){
+				return "none";
+			}
 			var parentView = parent;
 			var transition = null;
 			if(nextView){
@@ -264,7 +288,7 @@ define(["require", "dojo/_base/lang", "dojo/_base/declare", "dojo/has", "dojo/on
 			return viewParams;
 		},
 
-		_doTransition: function(transitionTo, opts, params, data, parent, removeView, doResize, nested){
+		_doTransition: function(transitionTo, opts, params, data, parent, removeView, doResize, forceTransitionNone, nested){
 			// summary:
 			//		Transitions from the currently visible view to the defined view.
 			//		It should determine what would be the best transition unless
@@ -285,6 +309,8 @@ define(["require", "dojo/_base/lang", "dojo/_base/declare", "dojo/has", "dojo/on
 			//		remove the view instead of transition to it
 			// doResize: Boolean
 			//		emit a resize event
+			// forceTransitionNone: Boolean
+			//		force the transition type to be none, used for the initial default view
 			// nested: Boolean
 			//		whether the method is called from the transitioning of a parent view
 			//
@@ -358,7 +384,7 @@ define(["require", "dojo/_base/lang", "dojo/_base/declare", "dojo/has", "dojo/on
 
 			if(nextSubNames == currentSubNames && next == current){ // new test to see if current matches next
 				this.app.log(LOGKEY,F,"Transition current and next DO MATCH From=["+currentSubNames+"] TO=["+nextSubNames+"]");
-				this._handleMatchingViews(nextSubViewArray, next, current, parent, data, removeView, doResize, subIds, currentSubNames);
+				this._handleMatchingViews(nextSubViewArray, next, current, parent, data, removeView, doResize, subIds, currentSubNames, toId, forceTransitionNone);
 
 			}else{
 				this.app.log(LOGKEY,F,"Transition current and next DO NOT MATCH From=["+currentSubNames+"] TO=["+nextSubNames+"]");
@@ -383,8 +409,21 @@ define(["require", "dojo/_base/lang", "dojo/_base/declare", "dojo/has", "dojo/on
 					this._handleBeforeActivateCalls(nextSubViewArray, this.currentLastSubChildMatch || current, data, subIds);
 				}
 				if(!removeView){
-					this.app.log(F+" calling _handleLayoutAndResizeCalls");
-					this._handleLayoutAndResizeCalls(nextSubViewArray, removeView, doResize, subIds);
+					var nextLastSubChild = this.nextLastSubChildMatch || next;
+					var trans = this._getTransition(nextLastSubChild, parent, toId, {}, forceTransitionNone)
+					this.app.log(F+" calling _handleLayoutAndResizeCalls trans="+trans);
+					this._handleLayoutAndResizeCalls(nextSubViewArray, removeView, doResize, subIds, forceTransitionNone, trans);
+				}else{
+					if(!this.app.skipAutoViewVisibilitySetting){
+						// for removeView need to set visible before transition do it here
+						for(var i = 0; i < nextSubViewArray.length; i++){
+							var v = nextSubViewArray[i];
+							this.app.log(LOGKEY,F,"setting visibility visible for v.id=["+v.id+"]");
+							if(v.domNode){
+								domStyle.set(v.domNode, "visibility", "visible");
+							}
+						}
+					}
 				}
 				var result = true;
 
@@ -393,14 +432,16 @@ define(["require", "dojo/_base/lang", "dojo/_base/declare", "dojo/has", "dojo/on
 					// css3 transit has the check for IE so it will not try to do it on ie, so we do not need to check it here.
 					// We skip in we are transitioning to a nested view from a parent view and that nested view
 					// did not have any current
-					result = this._handleTransit(next, parent, this.currentLastSubChildMatch, opts, toId, removeView)
+					result = this._handleTransit(next, parent, this.currentLastSubChildMatch, opts, toId, removeView, forceTransitionNone);
 				}
 				when(result, lang.hitch(this, function(){
 					if(next){
 						this.app.log(F+" back from transit for next ="+next.name);
 					}
 					if(removeView){
-						this._handleLayoutAndResizeCalls(nextSubViewArray, removeView, doResize, subIds);
+						var nextLastSubChild = this.nextLastSubChildMatch || next;
+						var trans = this._getTransition(nextLastSubChild, parent, toId, {}, forceTransitionNone)
+						this._handleLayoutAndResizeCalls(nextSubViewArray, removeView, doResize, subIds, forceTransitionNone, trans);
 					}
 
 					// Add call to handleAfterDeactivate and handleAfterActivate here!
@@ -411,7 +452,7 @@ define(["require", "dojo/_base/lang", "dojo/_base/declare", "dojo/has", "dojo/on
 			}
 		},
 
-		_handleMatchingViews: function(subs, next, current, parent, data, removeView, doResize, subIds, currentSubNames){
+		_handleMatchingViews: function(subs, next, current, parent, data, removeView, doResize, subIds, currentSubNames, toId, forceTransitionNone){
 			// summary:
 			//		Called when the current views and the next views match
 			var F = MODULE+":_handleMatchingViews";
@@ -421,7 +462,9 @@ define(["require", "dojo/_base/lang", "dojo/_base/declare", "dojo/has", "dojo/on
 			// calling _handleAfterDeactivateCalls here instead of after _handleLayoutAndResizeCalls
 			this._handleAfterDeactivateCalls(subs, this.nextLastSubChildMatch || next, current, data, subIds);
 			this._handleBeforeActivateCalls(subs, this.currentLastSubChildMatch || current, data, subIds);
-			this._handleLayoutAndResizeCalls(subs, removeView, doResize, subIds);
+			var nextLastSubChild = this.nextLastSubChildMatch || next;
+			var trans = this._getTransition(nextLastSubChild, parent, toId, {}, forceTransitionNone)
+			this._handleLayoutAndResizeCalls(subs, removeView, doResize, subIds, trans);
 			this._handleAfterActivateCalls(subs, removeView, this.currentLastSubChildMatch || current, data, subIds);
 		},
 
@@ -471,7 +514,7 @@ define(["require", "dojo/_base/lang", "dojo/_base/declare", "dojo/has", "dojo/on
 			}
 		},
 
-		_handleLayoutAndResizeCalls: function(subs, removeView, doResize, subIds){
+		_handleLayoutAndResizeCalls: function(subs, removeView, doResize, subIds, forceTransitionNone, transition){
 			// summary:
 			//		fire app-layoutView for each of the next views about to be activated, and fire app-resize if doResize is true
 			var F = MODULE+":_handleLayoutAndResizeCalls";
@@ -480,14 +523,32 @@ define(["require", "dojo/_base/lang", "dojo/_base/declare", "dojo/has", "dojo/on
 				var v = subs[i];
 				this.app.log(LOGKEY,F,"emit layoutView v.id=["+v.id+"] removeView=["+remove+"]");
 				// it seems like we should be able to minimize calls to resize by passing doResize: false and only doing resize on the app-resize emit
-				this.app.emit("app-layoutView", {"parent": v.parent, "view": v, "removeView": remove, "doResize": false});
+				this.app.emit("app-layoutView", {"parent": v.parent, "view": v, "removeView": remove, "doResize": false, "transition": transition, "currentLastSubChildMatch": this.currentLastSubChildMatch});
 				remove = false;
 			}
 			if(doResize){
 				this.app.log(LOGKEY,F,"emit doResize called");
 				this.app.emit("app-resize"); // after last layoutView fire app-resize
+				if(!this.app.skipAutoViewVisibilitySetting){
+					this._showSelectedChildren(this.app); // Need to set visible too before transition do it now.
+				}
+			}
+
+		},
+
+		_showSelectedChildren: function(w){
+			var F = MODULE+":_showSelectedChildren";
+			domStyle.set(w.domNode, "visibility", "visible");
+			for(var hash in w.selectedChildren){	// need this to handle all selectedChildren
+				if(w.selectedChildren[hash] && w.selectedChildren[hash].domNode){
+					this.app.log(LOGKEY,F," calling _showSelectedChildren for w.selectedChildren[hash].id="+w.selectedChildren[hash].id);
+					this._showSelectedChildren(w.selectedChildren[hash]);
+					this.app.log(LOGKEY,F," calling domStyle for w.selectedChildren[hash].id="+w.selectedChildren[hash].id);
+					domStyle.set(w.selectedChildren[hash].domNode, "visibility", "visible");
+				}
 			}
 		},
+
 
 		_handleAfterActivateCalls: function(subs, removeView, current, data, subIds){
 			// summary:
@@ -614,7 +675,7 @@ define(["require", "dojo/_base/lang", "dojo/_base/declare", "dojo/has", "dojo/on
 			return currentSubViewNamesArray;
 		},
 
-		_handleTransit: function(next, parent, currentLastSubChild, opts, toId, removeView){
+		_handleTransit: function(next, parent, currentLastSubChild, opts, toId, removeView, forceTransitionNone){
 			// summary:
 			//		Setup the options and call transit to do the transition
 			//
@@ -626,10 +687,12 @@ define(["require", "dojo/_base/lang", "dojo/_base/declare", "dojo/has", "dojo/on
 			//		the current view which is being transitioned away from
 			// opts: Object
 			//		the options used for the transition
-			// removeView: boolean
-			//		true if the view is being removed
 			// toId: String
 			//		the id of the view being transitioned to
+			// removeView: boolean
+			//		true if the view is being removed
+			// forceTransitionNone: boolean
+			//		true if the transition type should be forced to none, used for the initial defaultView
 			//
 			// returns:
 			//		the promise returned by the call to transit
@@ -641,7 +704,7 @@ define(["require", "dojo/_base/lang", "dojo/_base/declare", "dojo/has", "dojo/on
 			mergedOpts = lang.mixin({}, mergedOpts, {
 				reverse: (mergedOpts.reverse || mergedOpts.transitionDir === -1)?true:false,
 				// if transition is set for the view (or parent) in the config use it, otherwise use it from the event or defaultTransition from the config
-				transition: this._getTransition(nextLastSubChild, parent, toId, mergedOpts)
+				transition: this._getTransition(nextLastSubChild, parent, toId, mergedOpts, forceTransitionNone)
 			});
 
 			if(removeView){
@@ -652,6 +715,9 @@ define(["require", "dojo/_base/lang", "dojo/_base/declare", "dojo/has", "dojo/on
 			}
 			if(nextLastSubChild){
 				this.app.log(LOGKEY,F,"transit TO nextLastSubChild.id=["+nextLastSubChild.id+"] transition=["+mergedOpts.transition+"]");
+				if(!this.app.skipAutoViewVisibilitySetting){
+					domStyle.set(nextLastSubChild.domNode, "visibility", "visible"); // To view needs to be showing before transition
+				}
 			}
 			return transit(currentLastSubChild && currentLastSubChild.domNode, nextLastSubChild && nextLastSubChild.domNode, mergedOpts);
 		}

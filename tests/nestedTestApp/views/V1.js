@@ -22,19 +22,23 @@ function(dom, domStyle, connect, registry){
 				list.setStore(app.stores.longlistStore.store);
 			}
 
-			if(registry.byId("heading1")){
-				registry.byId("heading1").labelDivNode.innerHTML = "Long List One";
-			}
-			if(dom.byId("tab1WrapperA")){ 
-				domStyle.set(dom.byId("tab1WrapperA"), "visibility", "visible");  // show the nav view if it being used
-				domStyle.set(dom.byId("tab1WrapperB"), "visibility", "visible");  // show the nav view if it being used
-			}
+		//	if(registry.byId("heading1")){
+		//		registry.byId("heading1").labelDivNode.innerHTML = "Long List One";
+		//	}
+		//	if(dom.byId("tab1WrapperA")){
+		//		domStyle.set(dom.byId("tab1WrapperA"), "visibility", "visible");  // show the nav view if it being used
+		//		domStyle.set(dom.byId("tab1WrapperB"), "visibility", "visible");  // show the nav view if it being used
+		//	}
 		},
 
 		afterActivate: function(){
 			// summary:
 			//		view life cycle afterActivate()
 			//console.log(MODULE+" afterActivate");
+		//	if(dom.byId("tab1WrapperA")){
+		//		domStyle.set(dom.byId("tab1WrapperA"), "visibility", "visible");  // show the nav view if it being used
+		//		domStyle.set(dom.byId("tab1WrapperB"), "visibility", "visible");  // show the nav view if it being used
+		//	}
 		},
 		beforeDeactivate: function(){
 			//console.log(MODULE+" beforeDeactivate");

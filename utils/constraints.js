@@ -29,6 +29,7 @@ define(["dojo/_base/array"], function(arr){
 			//		tbe constraint object
 			// child: View
 			//		the child to select
+			constraint = constraint ? constraint : view.constraint;
 			var type = typeof(constraint);
 			var hash = (type == "string" || type == "number") ? constraint : constraint.__hash;
 			view.selectedChildren[hash] = child;

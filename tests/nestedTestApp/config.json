@@ -61,10 +61,12 @@
 		"!phone" : {
 			"template": "nestedTestApp/views/tablet/ViewScrollableLists.html",
 			"controller": "nestedTestApp/views/tablet/ViewScrollableLists",
-			"defaultView": "P1,S1,V8"
+		//	"defaultView": "P1,S1,V1+P1,S1,V8"
+		//	"defaultView": "P1,S1,V8"
 		//	"defaultView": "P1"
-		//	"defaultView": "V2"
-		//	"defaultView": "P2,S2,Ss2,V5+P2,S2,Ss2,V6"
+			"defaultView": "V2"
+		//	"defaultView": "P2,S2,Ss2"
+		//	"defaultView": "P2,S2,Ss2+P2,S2,Ss2,V6"
 		},
 		"ie9orLess" : {
 			"controllers": [
@@ -91,6 +93,7 @@
 	},
 	"timedAutoFlow": 0,
 	"timed100Loops": 0,
+	//"skipAutoViewVisibilitySetting": true,  // added this flag in case someone did not like the new visibility change
 
 	//views are groups of views and models loaded at once
 	"views": {
@@ -114,15 +117,16 @@
 				"S1": {
 					"template": "nestedTestApp/views/S1.html",
 					"controller": "nestedTestApp/views/S1.js",
-					//"defaultView": "V1",
+					//"defaultView": "V8",
 					"defaultView": "V1+V8",
+					"transition": "none",
 					"views": {
 						"TestInfo": {
 							"template": "nestedTestApp/views/TestInfo.html",
 							"controller": "nestedTestApp/views/TestInfo.js"
 						},
 						"V1": {
-							"transition": "flip",
+							"transition": "slide",
 							"template": "nestedTestApp/views/V1.html",
 							"controller": "nestedTestApp/views/V1.js"
 						},
@@ -151,12 +155,13 @@
 			"template": "nestedTestApp/views/V4.html"
 		},
 		"P2": {
+		//	"transition": "none",
 			"defaultTransition": "slide",
 			"views": {
 				"S2": {
 					"views": {
 						"Ss2": {
-							"defaultView": "V5",
+							"defaultView": "V5+V6",
 							"views": {
 								"V5": {
 									"controller": "nestedTestApp/views/V5.js",

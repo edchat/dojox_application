@@ -19,7 +19,7 @@ function(dom, domStyle, connect, registry, has, TransitionEvent){
 				domStyle.set(dom.byId(backId), "visibility", "hidden"); // hide the back button in tablet mode
 			}
 			if(dom.byId("tab1WrapperB") && !has("phone")){ 
-				domStyle.set(dom.byId("tab1WrapperB"), "visibility", "visible");  // show the nav view if it being used
+				//domStyle.set(dom.byId("tab1WrapperB"), "visibility", "visible");  // show the nav view if it being used
 			}
 			domStyle.set(dom.byId(wrapperIdB), "visibility", "visible");  // show the view when it is ready
 		},
