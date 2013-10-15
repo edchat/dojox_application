@@ -140,7 +140,7 @@ define(["require", "dojo/when", "dojo/on", "dojo/dom-attr", "dojo/dom-style", "d
 			// tags:
 			//		private
 
-			if(!this.app.skipAutoViewVisibilitySetting){
+			if(!this.app.skipAutoViewVisibility){
 				domStyle.set(this.domNode, "visibility", "hidden");
 			}
 

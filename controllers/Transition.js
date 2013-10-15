@@ -402,7 +402,7 @@ define(["require", "dojo/_base/lang", "dojo/_base/declare", "dojo/has", "dojo/on
 				//activate or deactivate views and refresh layout.
 
 				//this is necessary, to avoid a flash when the layout sets display before resize
-				if(!this.app.skipAutoViewVisibilitySetting && !removeView && next){
+				if(!this.app.skipAutoViewVisibility && !removeView && next){
 					var nextLastSubChild = this.nextLastSubChildMatch || next;
 					this.app.log(LOGKEY,F," setting domStyle visibility hidden for v.id=["+nextLastSubChild.id+"], display=["+nextLastSubChild.domNode.style.display+"], visibility=["+nextLastSubChild.domNode.style.visibility+"]");
 					domStyle.set(nextLastSubChild.domNode, "visibility", "hidden");  // hide the view until after resize
@@ -421,7 +421,7 @@ define(["require", "dojo/_base/lang", "dojo/_base/declare", "dojo/has", "dojo/on
 					this.app.log(F+" calling _handleLayoutAndResizeCalls trans="+trans);
 					this._handleLayoutAndResizeCalls(nextSubViewArray, removeView, doResize, subIds, forceTransitionNone, trans);
 				}else{
-					if(!this.app.skipAutoViewVisibilitySetting){
+					if(!this.app.skipAutoViewVisibility){
 						// for removeView need to set visible before transition do it here
 						for(var i = 0; i < nextSubViewArray.length; i++){
 							var v = nextSubViewArray[i];
@@ -537,7 +537,7 @@ define(["require", "dojo/_base/lang", "dojo/_base/declare", "dojo/has", "dojo/on
 			if(doResize){
 				this.app.log(LOGKEY,F,"emit doResize called");
 				this.app.emit("app-resize"); // after last layoutView fire app-resize
-				if(!this.app.skipAutoViewVisibilitySetting){
+				if(!this.app.skipAutoViewVisibility){
 					this._showSelectedChildren(this.app); // Need to set visible too before transition do it now.
 				}
 			}
@@ -721,7 +721,7 @@ define(["require", "dojo/_base/lang", "dojo/_base/declare", "dojo/has", "dojo/on
 				this.app.log(LOGKEY,F,"transit FROM currentLastSubChild.id=["+currentLastSubChild.id+"]");
 			}
 			if(nextLastSubChild){
-				if(!this.app.skipAutoViewVisibilitySetting && mergedOpts.transition !== "none"){
+				if(!this.app.skipAutoViewVisibility && mergedOpts.transition !== "none"){
 					this.app.log(LOGKEY,F,"  setting domStyle visibility visible for w3.id=["+nextLastSubChild.id+"], display=["+nextLastSubChild.domNode.style.display+"], visibility=["+nextLastSubChild.domNode.style.visibility+"]");
 					domStyle.set(nextLastSubChild.domNode, "visibility", "visible"); // To view needs to be showing before transition
 				}

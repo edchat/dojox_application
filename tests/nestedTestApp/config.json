@@ -93,7 +93,7 @@
 	},
 	"timedAutoFlow": 0,
 	"timed100Loops": 0,
-	//"skipAutoViewVisibilitySetting": true,  // added this flag in case someone did not like the new visibility change
+	//"skipAutoViewVisibility": true,  // added this flag in case someone did not like the new visibility change
 
 	//views are groups of views and models loaded at once
 	"views": {
