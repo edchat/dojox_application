@@ -126,13 +126,13 @@ function(lang, declare, has, win, config, domAttr, topic, domStyle, constraints,
 		},
 
 		hideView: function(view){
-			this.app.log("in LayoutBase:hideView called for view.id="+view.id);
+			this.app.log("logTransitions:","LayoutBase"+" setting domStyle display none for view.id=["+view.id+"], visibility=["+view.domNode.style.visibility+"]");
 			domStyle.set(view.domNode, "display", "none");
 		},
 
 		showView: function(view){
-			this.app.log("in LayoutBase:showView called for view.id="+view.id);
 			if(view.domNode){
+				this.app.log("logTransitions:","LayoutBase"+" setting domStyle display to display for view.id=["+view.id+"], visibility=["+view.domNode.style.visibility+"]");
 				domStyle.set(view.domNode, "display", "");
 			}
 		}

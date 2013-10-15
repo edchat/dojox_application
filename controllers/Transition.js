@@ -10,7 +10,7 @@ define(["require", "dojo/_base/lang", "dojo/_base/declare", "dojo/has", "dojo/on
 	//		dojox/app/controllers/Transition
 	//		Bind "app-transition" event on dojox/app application instance.
 	//		Do transition from one view to another view.
-	return declare(Controller, {
+	return declare("dojox.app.controllers.Transition", Controller, {
 
 		proceeding: false,
 
@@ -401,6 +401,13 @@ define(["require", "dojo/_base/lang", "dojo/_base/declare", "dojo/has", "dojo/on
 				//a promise object. this.set(...) will handles the this.selectedChild,
 				//activate or deactivate views and refresh layout.
 
+				//this is necessary, to avoid a flash when the layout sets display before resize
+				if(!this.app.skipAutoViewVisibilitySetting && !removeView && next){
+					var nextLastSubChild = this.nextLastSubChildMatch || next;
+					this.app.log(LOGKEY,F," setting domStyle visibility hidden for v.id=["+nextLastSubChild.id+"], display=["+nextLastSubChild.domNode.style.display+"], visibility=["+nextLastSubChild.domNode.style.visibility+"]");
+					domStyle.set(nextLastSubChild.domNode, "visibility", "hidden");  // hide the view until after resize
+				}
+
 				if(current && current._active){
 					this._handleBeforeDeactivateCalls(currentSubViewArray, this.nextLastSubChildMatch || next, current, data, subIds);
 				}
@@ -420,6 +427,7 @@ define(["require", "dojo/_base/lang", "dojo/_base/declare", "dojo/has", "dojo/on
 							var v = nextSubViewArray[i];
 							this.app.log(LOGKEY,F,"setting visibility visible for v.id=["+v.id+"]");
 							if(v.domNode){
+								this.app.log(LOGKEY,F,"  setting domStyle for removeView visibility visible for v.id=["+v.id+"], display=["+v.domNode.style.display+"]");
 								domStyle.set(v.domNode, "visibility", "visible");
 							}
 						}
@@ -538,13 +546,12 @@ define(["require", "dojo/_base/lang", "dojo/_base/declare", "dojo/has", "dojo/on
 
 		_showSelectedChildren: function(w){
 			var F = MODULE+":_showSelectedChildren";
+			this.app.log(LOGKEY,F," setting domStyle visibility visible for w.id=["+w.id+"], display=["+w.domNode.style.display+"], visibility=["+w.domNode.style.visibility+"]");
 			domStyle.set(w.domNode, "visibility", "visible");
 			for(var hash in w.selectedChildren){	// need this to handle all selectedChildren
 				if(w.selectedChildren[hash] && w.selectedChildren[hash].domNode){
 					this.app.log(LOGKEY,F," calling _showSelectedChildren for w.selectedChildren[hash].id="+w.selectedChildren[hash].id);
 					this._showSelectedChildren(w.selectedChildren[hash]);
-					this.app.log(LOGKEY,F," calling domStyle for w.selectedChildren[hash].id="+w.selectedChildren[hash].id);
-					domStyle.set(w.selectedChildren[hash].domNode, "visibility", "visible");
 				}
 			}
 		},
@@ -714,10 +721,11 @@ define(["require", "dojo/_base/lang", "dojo/_base/declare", "dojo/has", "dojo/on
 				this.app.log(LOGKEY,F,"transit FROM currentLastSubChild.id=["+currentLastSubChild.id+"]");
 			}
 			if(nextLastSubChild){
-				this.app.log(LOGKEY,F,"transit TO nextLastSubChild.id=["+nextLastSubChild.id+"] transition=["+mergedOpts.transition+"]");
-				if(!this.app.skipAutoViewVisibilitySetting){
+				if(!this.app.skipAutoViewVisibilitySetting && mergedOpts.transition !== "none"){
+					this.app.log(LOGKEY,F,"  setting domStyle visibility visible for w3.id=["+nextLastSubChild.id+"], display=["+nextLastSubChild.domNode.style.display+"], visibility=["+nextLastSubChild.domNode.style.visibility+"]");
 					domStyle.set(nextLastSubChild.domNode, "visibility", "visible"); // To view needs to be showing before transition
 				}
+				this.app.log(LOGKEY,F,"transit TO nextLastSubChild.id=["+nextLastSubChild.id+"] transition=["+mergedOpts.transition+"]");
 			}
 			return transit(currentLastSubChild && currentLastSubChild.domNode, nextLastSubChild && nextLastSubChild.domNode, mergedOpts);
 		}
