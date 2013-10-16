@@ -59,10 +59,32 @@ define(["require", "dojo/_base/lang", "dojo/_base/declare", "dojo/has", "dojo/on
 				while(parts.length > 1){ 	
 					viewId = parts.shift();
 					newEvent = lang.clone(event);
-					newEvent.viewId = viewId;
-					this.proceeding = true;
-					newEvent._removeView = false;
-					this.proceedTransition(newEvent);
+					if(viewId.indexOf("-") >= 0){ // there is a remove
+						var removeParts = viewId.split('-');
+						if(removeParts.length > 0){
+							viewId = removeParts.shift();
+							if(viewId){
+								newEvent._removeView = false;
+								newEvent.viewId = viewId;
+								this.proceeding = true;
+								this.proceedTransition(newEvent);
+								newEvent = lang.clone(event);
+							}
+							viewId = removeParts.shift();
+							if(viewId){
+								newEvent._removeView = true;
+								newEvent.viewId = viewId;
+								this.proceeding = true;
+								this.proceedTransition(newEvent);
+							}
+						}
+//						newEvent._removeView = true;
+					}else{
+						newEvent._removeView = false;
+						newEvent.viewId = viewId;
+						this.proceeding = true;
+						this.proceedTransition(newEvent);
+					}
 				}
 				viewId = parts.shift();
 				var removeParts = viewId.split('-');
@@ -405,7 +427,8 @@ define(["require", "dojo/_base/lang", "dojo/_base/declare", "dojo/has", "dojo/on
 				if(!this.app.skipAutoViewVisibility && !removeView && next){
 					var nextLastSubChild = this.nextLastSubChildMatch || next;
 					this.app.log(LOGKEY,F," setting domStyle visibility hidden for v.id=["+nextLastSubChild.id+"], display=["+nextLastSubChild.domNode.style.display+"], visibility=["+nextLastSubChild.domNode.style.visibility+"]");
-					domStyle.set(nextLastSubChild.domNode, "visibility", "hidden");  // hide the view until after resize
+				//	domStyle.set(nextLastSubChild.domNode, "visibility", "hidden");  // hide the view until after resize
+					domStyle.set(nextLastSubChild.domNode, "opacity", 0);  // hide the view until after resize
 				}
 
 				if(current && current._active){
@@ -428,7 +451,8 @@ define(["require", "dojo/_base/lang", "dojo/_base/declare", "dojo/has", "dojo/on
 							this.app.log(LOGKEY,F,"setting visibility visible for v.id=["+v.id+"]");
 							if(v.domNode){
 								this.app.log(LOGKEY,F,"  setting domStyle for removeView visibility visible for v.id=["+v.id+"], display=["+v.domNode.style.display+"]");
-								domStyle.set(v.domNode, "visibility", "visible");
+							//	domStyle.set(v.domNode, "visibility", "visible");
+								domStyle.set(v.domNode, "opacity", 1);
 							}
 						}
 					}
@@ -547,7 +571,8 @@ define(["require", "dojo/_base/lang", "dojo/_base/declare", "dojo/has", "dojo/on
 		_showSelectedChildren: function(w){
 			var F = MODULE+":_showSelectedChildren";
 			this.app.log(LOGKEY,F," setting domStyle visibility visible for w.id=["+w.id+"], display=["+w.domNode.style.display+"], visibility=["+w.domNode.style.visibility+"]");
-			domStyle.set(w.domNode, "visibility", "visible");
+		//	domStyle.set(w.domNode, "visibility", "visible");
+			domStyle.set(w.domNode, "opacity", 1);
 			for(var hash in w.selectedChildren){	// need this to handle all selectedChildren
 				if(w.selectedChildren[hash] && w.selectedChildren[hash].domNode){
 					this.app.log(LOGKEY,F," calling _showSelectedChildren for w.selectedChildren[hash].id="+w.selectedChildren[hash].id);
@@ -723,7 +748,8 @@ define(["require", "dojo/_base/lang", "dojo/_base/declare", "dojo/has", "dojo/on
 			if(nextLastSubChild){
 				if(!this.app.skipAutoViewVisibility && mergedOpts.transition !== "none"){
 					this.app.log(LOGKEY,F,"  setting domStyle visibility visible for w3.id=["+nextLastSubChild.id+"], display=["+nextLastSubChild.domNode.style.display+"], visibility=["+nextLastSubChild.domNode.style.visibility+"]");
-					domStyle.set(nextLastSubChild.domNode, "visibility", "visible"); // To view needs to be showing before transition
+				//	domStyle.set(nextLastSubChild.domNode, "visibility", "visible"); // To view needs to be showing before transition
+					domStyle.set(nextLastSubChild.domNode, "opacity", 1); // To view needs to be showing before transition
 				}
 				this.app.log(LOGKEY,F,"transit TO nextLastSubChild.id=["+nextLastSubChild.id+"] transition=["+mergedOpts.transition+"]");
 			}

@@ -58,6 +58,7 @@ define(["require", "dojo/_base/lang", "dojo/_base/declare", "dojo/on", "dojo/Def
 			var viewArray = [];
 			// create an array from the diff views in event.viewId (they are separated by +)
 			var parts = views.split('+');
+			var removePartsTest = views.split('-');
 			while(parts.length > 0){
 				var viewId = parts.shift();
 				viewArray.push(viewId);
