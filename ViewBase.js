@@ -142,6 +142,7 @@ define(["require", "dojo/when", "dojo/on", "dojo/dom-attr", "dojo/dom-style", "d
 
 			if(!this.app.skipAutoViewVisibility){
 				domStyle.set(this.domNode, "visibility", "hidden");
+				this._needsResize = true;
 			//	domStyle.set(this.domNode, "opacity", 0);
 			}
 

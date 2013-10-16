@@ -424,12 +424,13 @@ define(["require", "dojo/_base/lang", "dojo/_base/declare", "dojo/has", "dojo/on
 				//activate or deactivate views and refresh layout.
 
 				//this is necessary, to avoid a flash when the layout sets display before resize
-				if(!this.app.skipAutoViewVisibility && !removeView && next){
-					var nextLastSubChild = this.nextLastSubChildMatch || next;
-					this.app.log(LOGKEY,F," setting domStyle visibility hidden for v.id=["+nextLastSubChild.id+"], display=["+nextLastSubChild.domNode.style.display+"], visibility=["+nextLastSubChild.domNode.style.visibility+"]");
-					domStyle.set(nextLastSubChild.domNode, "visibility", "hidden");  // hide the view until after resize
+		// Or can make sure resize had been called before setting visibility visible before transition.
+		//		if(!this.app.skipAutoViewVisibility && !removeView && next){
+		//			var nextLastSubChild = this.nextLastSubChildMatch || next;
+		//			this.app.log(LOGKEY,F," setting domStyle visibility hidden for v.id=["+nextLastSubChild.id+"], display=["+nextLastSubChild.domNode.style.display+"], visibility=["+nextLastSubChild.domNode.style.visibility+"]");
+		//			domStyle.set(nextLastSubChild.domNode, "visibility", "hidden");  // hide the view until after resize
 				//	domStyle.set(nextLastSubChild.domNode, "opacity", 0);  // hide the view until after resize
-				}
+		//		}
 
 				if(current && current._active){
 					this._handleBeforeDeactivateCalls(currentSubViewArray, this.nextLastSubChildMatch || next, current, data, subIds);
@@ -464,7 +465,7 @@ define(["require", "dojo/_base/lang", "dojo/_base/declare", "dojo/has", "dojo/on
 					// css3 transit has the check for IE so it will not try to do it on ie, so we do not need to check it here.
 					// We skip in we are transitioning to a nested view from a parent view and that nested view
 					// did not have any current
-					result = this._handleTransit(next, parent, this.currentLastSubChildMatch, opts, toId, removeView, forceTransitionNone);
+					result = this._handleTransit(next, parent, this.currentLastSubChildMatch, opts, toId, removeView, forceTransitionNone, doResize);
 				}
 				when(result, lang.hitch(this, function(){
 					if(next){
@@ -572,6 +573,7 @@ define(["require", "dojo/_base/lang", "dojo/_base/declare", "dojo/has", "dojo/on
 			var F = MODULE+":_showSelectedChildren";
 			this.app.log(LOGKEY,F," setting domStyle visibility visible for w.id=["+w.id+"], display=["+w.domNode.style.display+"], visibility=["+w.domNode.style.visibility+"]");
 			domStyle.set(w.domNode, "visibility", "visible");
+			w._needsResize = false;
 		//	domStyle.set(w.domNode, "opacity", 1);
 			for(var hash in w.selectedChildren){	// need this to handle all selectedChildren
 				if(w.selectedChildren[hash] && w.selectedChildren[hash].domNode){
@@ -707,7 +709,7 @@ define(["require", "dojo/_base/lang", "dojo/_base/declare", "dojo/has", "dojo/on
 			return currentSubViewNamesArray;
 		},
 
-		_handleTransit: function(next, parent, currentLastSubChild, opts, toId, removeView, forceTransitionNone){
+		_handleTransit: function(next, parent, currentLastSubChild, opts, toId, removeView, forceTransitionNone, resizeDone){
 			// summary:
 			//		Setup the options and call transit to do the transition
 			//
@@ -725,6 +727,8 @@ define(["require", "dojo/_base/lang", "dojo/_base/declare", "dojo/has", "dojo/on
 			//		true if the view is being removed
 			// forceTransitionNone: boolean
 			//		true if the transition type should be forced to none, used for the initial defaultView
+			// resizeDone: boolean
+			//		true if resize was called before this transition
 			//
 			// returns:
 			//		the promise returned by the call to transit
@@ -747,9 +751,12 @@ define(["require", "dojo/_base/lang", "dojo/_base/declare", "dojo/has", "dojo/on
 			}
 			if(nextLastSubChild){
 				if(!this.app.skipAutoViewVisibility && mergedOpts.transition !== "none"){
-					this.app.log(LOGKEY,F,"  setting domStyle visibility visible for w3.id=["+nextLastSubChild.id+"], display=["+nextLastSubChild.domNode.style.display+"], visibility=["+nextLastSubChild.domNode.style.visibility+"]");
-					domStyle.set(nextLastSubChild.domNode, "visibility", "visible"); // To view needs to be showing before transition
-				//	domStyle.set(nextLastSubChild.domNode, "opacity", 1); // To view needs to be showing before transition
+					if(!resizeDone && nextLastSubChild._needsResize){ // need to resize if not done yet or things will not be positioned correctly
+						this.app.log(LOGKEY,F,"emit doResize called from _handleTransit");
+						this.app.emit("app-resize"); // after last layoutView fire app-resize
+					}
+					this.app.log(LOGKEY,F,"  calling _showSelectedChildren for w3.id=["+nextLastSubChild.id+"], display=["+nextLastSubChild.domNode.style.display+"], visibility=["+nextLastSubChild.domNode.style.visibility+"]");
+					this._showSelectedChildren(nextLastSubChild); // Need to set visible too before transition do it now.
 				}
 				this.app.log(LOGKEY,F,"transit TO nextLastSubChild.id=["+nextLastSubChild.id+"] transition=["+mergedOpts.transition+"]");
 			}
