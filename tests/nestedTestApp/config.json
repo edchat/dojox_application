@@ -26,6 +26,9 @@
 		"dojo/store/Memory",
 		"dojo/store/Observable",
 		"dojox/mobile/ScrollableView"
+		,"dojox/mobile/Carousel"
+		,"dojox/mobile/SwapView"
+		,"dojox/mobile/CarouselItem"
 	],
 	// Modules for the application.  They are basically used as the second
 	// array of mixins in a dojo.declare().  Modify the top level behavior
@@ -63,8 +66,8 @@
 			"controller": "nestedTestApp/views/tablet/ViewScrollableLists",
 		//	"defaultView": "P1,S1,V1+P1,S1,V8"
 		//	"defaultView": "P1,S1,V8"
-		//	"defaultView": "P1"
-			"defaultView": "V2"
+			"defaultView": "P1"
+		//	"defaultView": "V2"
 		//	"defaultView": "P2,S2,Ss2"
 		//	"defaultView": "P2,S2,Ss2+P2,S2,Ss2,V6"
 		},
