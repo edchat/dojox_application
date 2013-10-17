@@ -424,13 +424,12 @@ define(["require", "dojo/_base/lang", "dojo/_base/declare", "dojo/has", "dojo/on
 				//activate or deactivate views and refresh layout.
 
 				//this is necessary, to avoid a flash when the layout sets display before resize
-		// Or can make sure resize had been called before setting visibility visible before transition.
-		//		if(!this.app.skipAutoViewVisibility && !removeView && next){
-		//			var nextLastSubChild = this.nextLastSubChildMatch || next;
-		//			this.app.log(LOGKEY,F," setting domStyle visibility hidden for v.id=["+nextLastSubChild.id+"], display=["+nextLastSubChild.domNode.style.display+"], visibility=["+nextLastSubChild.domNode.style.visibility+"]");
-		//			domStyle.set(nextLastSubChild.domNode, "visibility", "hidden");  // hide the view until after resize
+				if(!this.app.skipAutoViewVisibility && !removeView && next){
+					var nextLastSubChild = this.nextLastSubChildMatch || next;
+					this.app.log(LOGKEY,F," setting domStyle visibility hidden for v.id=["+nextLastSubChild.id+"], display=["+nextLastSubChild.domNode.style.display+"], visibility=["+nextLastSubChild.domNode.style.visibility+"]");
+					domStyle.set(nextLastSubChild.domNode, "visibility", "hidden");  // hide the view until after resize
 				//	domStyle.set(nextLastSubChild.domNode, "opacity", 0);  // hide the view until after resize
-		//		}
+				}
 
 				if(current && current._active){
 					this._handleBeforeDeactivateCalls(currentSubViewArray, this.nextLastSubChildMatch || next, current, data, subIds);
@@ -562,7 +561,7 @@ define(["require", "dojo/_base/lang", "dojo/_base/declare", "dojo/has", "dojo/on
 			if(doResize){
 				this.app.log(LOGKEY,F,"emit doResize called");
 				this.app.emit("app-resize"); // after last layoutView fire app-resize
-				if(!this.app.skipAutoViewVisibility){
+				if(!this.app.skipAutoViewVisibility && transition == "none"){
 					this._showSelectedChildren(this.app); // Need to set visible too before transition do it now.
 				}
 			}
@@ -756,9 +755,11 @@ define(["require", "dojo/_base/lang", "dojo/_base/declare", "dojo/has", "dojo/on
 						this.app.emit("app-resize"); // after last layoutView fire app-resize
 					}
 					this.app.log(LOGKEY,F,"  calling _showSelectedChildren for w3.id=["+nextLastSubChild.id+"], display=["+nextLastSubChild.domNode.style.display+"], visibility=["+nextLastSubChild.domNode.style.visibility+"]");
-					this._showSelectedChildren(nextLastSubChild); // Need to set visible too before transition do it now.
+					this._showSelectedChildren(this.app); // Need to set visible too before transition do it now.
 				}
 				this.app.log(LOGKEY,F,"transit TO nextLastSubChild.id=["+nextLastSubChild.id+"] transition=["+mergedOpts.transition+"]");
+			}else{
+				this._showSelectedChildren(this.app); // Need to set visible too before transition do it now.
 			}
 			return transit(currentLastSubChild && currentLastSubChild.domNode, nextLastSubChild && nextLastSubChild.domNode, mergedOpts);
 		}
