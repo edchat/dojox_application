@@ -44,13 +44,13 @@ function(dom, domStyle, connect, Memory, Observable, has){
 			// summary:
 			//		view life cycle beforeActivate()
 			//console.log(MODULE+" beforeActivate");
-		//	if(dom.byId(backId) && !has("phone")){
-		//		domStyle.set(dom.byId(backId), "visibility", "hidden"); // hide the back button in tablet mode
-		//	}
-		//	if(dom.byId("tab1WrapperA")){
-		//		domStyle.set(dom.byId("tab1WrapperA"), "visibility", "visible");  // show the nav view if it being used
-		//		domStyle.set(dom.byId("tab1WrapperB"), "visibility", "visible");  // show the nav view if it being used
-		//	}
+			if(dom.byId(backId) && !has("phone")){
+				domStyle.set(dom.byId(backId), "visibility", "hidden"); // hide the back button in tablet mode
+			}
+			if(dom.byId("tab1WrapperA")){
+				domStyle.set(dom.byId("tab1WrapperA"), "visibility", "visible");  // show the nav view if it being used
+				domStyle.set(dom.byId("tab1WrapperB"), "visibility", "visible");  // show the nav view if it being used
+			}
 		},
 
 		afterActivate: function(){

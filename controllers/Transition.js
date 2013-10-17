@@ -78,7 +78,6 @@ define(["require", "dojo/_base/lang", "dojo/_base/declare", "dojo/has", "dojo/on
 								this.proceedTransition(newEvent);
 							}
 						}
-//						newEvent._removeView = true;
 					}else{
 						newEvent._removeView = false;
 						newEvent.viewId = viewId;
@@ -423,21 +422,20 @@ define(["require", "dojo/_base/lang", "dojo/_base/declare", "dojo/has", "dojo/on
 				//a promise object. this.set(...) will handles the this.selectedChild,
 				//activate or deactivate views and refresh layout.
 
-				//this is necessary, to avoid a flash when the layout sets display before resize
+				//necessary, to avoid a flash when the layout sets display before resize
 				if(!this.app.skipAutoViewVisibility && !removeView && next){
 					var nextLastSubChild = this.nextLastSubChildMatch || next;
-					var startHiding = false;
+					var startHiding = false; // only hide views which will transition in
 					for(var i = nextSubViewArray.length-1; i >= 0; i--){
 						var v = nextSubViewArray[i];
 						if(startHiding || v.id == nextLastSubChild.id){
 							startHiding = true;
-							this.app.log(LOGKEY,F," setting domStyle visibility hidden for v.id=["+v.id+"], display=["+v.domNode.style.display+"], visibility=["+v.domNode.style.visibility+"]");
-							domStyle.set(v.domNode, "visibility", "hidden");  // hide the view until after resize
+							if(!v._needsResize && v.domNode){
+								this.app.log(LOGKEY,F," setting domStyle visibility hidden for v.id=["+v.id+"], display=["+v.domNode.style.display+"], visibility=["+v.domNode.style.visibility+"]");
+								domStyle.set(v.domNode, "visibility", "hidden");  // hide the view until after resize
+							}
 						}
 					}
-				//	this.app.log(LOGKEY,F," setting domStyle visibility hidden for v.id=["+nextLastSubChild.id+"], display=["+nextLastSubChild.domNode.style.display+"], visibility=["+nextLastSubChild.domNode.style.visibility+"]");
-				//	domStyle.set(nextLastSubChild.domNode, "visibility", "hidden");  // hide the view until after resize
-				//	domStyle.set(nextLastSubChild.domNode, "opacity", 0);  // hide the view until after resize
 				}
 
 				if(current && current._active){
@@ -461,7 +459,6 @@ define(["require", "dojo/_base/lang", "dojo/_base/declare", "dojo/has", "dojo/on
 							if(v.domNode){
 								this.app.log(LOGKEY,F,"  setting domStyle for removeView visibility visible for v.id=["+v.id+"], display=["+v.domNode.style.display+"]");
 								domStyle.set(v.domNode, "visibility", "visible");
-							//	domStyle.set(v.domNode, "opacity", 1);
 							}
 						}
 					}
@@ -582,7 +579,6 @@ define(["require", "dojo/_base/lang", "dojo/_base/declare", "dojo/has", "dojo/on
 			this.app.log(LOGKEY,F," setting domStyle visibility visible for w.id=["+w.id+"], display=["+w.domNode.style.display+"], visibility=["+w.domNode.style.visibility+"]");
 			domStyle.set(w.domNode, "visibility", "visible");
 			w._needsResize = false;
-		//	domStyle.set(w.domNode, "opacity", 1);
 			for(var hash in w.selectedChildren){	// need this to handle all selectedChildren
 				if(w.selectedChildren[hash] && w.selectedChildren[hash].domNode){
 					this.app.log(LOGKEY,F," calling _showSelectedChildren for w.selectedChildren[hash].id="+w.selectedChildren[hash].id);
