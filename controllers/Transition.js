@@ -426,8 +426,17 @@ define(["require", "dojo/_base/lang", "dojo/_base/declare", "dojo/has", "dojo/on
 				//this is necessary, to avoid a flash when the layout sets display before resize
 				if(!this.app.skipAutoViewVisibility && !removeView && next){
 					var nextLastSubChild = this.nextLastSubChildMatch || next;
-					this.app.log(LOGKEY,F," setting domStyle visibility hidden for v.id=["+nextLastSubChild.id+"], display=["+nextLastSubChild.domNode.style.display+"], visibility=["+nextLastSubChild.domNode.style.visibility+"]");
-					domStyle.set(nextLastSubChild.domNode, "visibility", "hidden");  // hide the view until after resize
+					var startHiding = false;
+					for(var i = nextSubViewArray.length-1; i >= 0; i--){
+						var v = nextSubViewArray[i];
+						if(startHiding || v.id == nextLastSubChild.id){
+							startHiding = true;
+							this.app.log(LOGKEY,F," setting domStyle visibility hidden for v.id=["+v.id+"], display=["+v.domNode.style.display+"], visibility=["+v.domNode.style.visibility+"]");
+							domStyle.set(v.domNode, "visibility", "hidden");  // hide the view until after resize
+						}
+					}
+				//	this.app.log(LOGKEY,F," setting domStyle visibility hidden for v.id=["+nextLastSubChild.id+"], display=["+nextLastSubChild.domNode.style.display+"], visibility=["+nextLastSubChild.domNode.style.visibility+"]");
+				//	domStyle.set(nextLastSubChild.domNode, "visibility", "hidden");  // hide the view until after resize
 				//	domStyle.set(nextLastSubChild.domNode, "opacity", 0);  // hide the view until after resize
 				}
 
