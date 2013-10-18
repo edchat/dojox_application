@@ -432,7 +432,7 @@ define(["require", "dojo/_base/lang", "dojo/_base/declare", "dojo/has", "dojo/on
 							startHiding = true;
 							if(!v._needsResize && v.domNode){
 								this.app.log(LOGKEY,F," setting domStyle visibility hidden for v.id=["+v.id+"], display=["+v.domNode.style.display+"], visibility=["+v.domNode.style.visibility+"]");
-								domStyle.set(v.domNode, "visibility", "hidden");  // hide the view until after resize
+								this._setViewVisible(v, false);
 							}
 						}
 					}
@@ -447,7 +447,7 @@ define(["require", "dojo/_base/lang", "dojo/_base/declare", "dojo/has", "dojo/on
 				}
 				if(!removeView){
 					var nextLastSubChild = this.nextLastSubChildMatch || next;
-					var trans = this._getTransition(nextLastSubChild, parent, toId, {}, forceTransitionNone)
+					var trans = this._getTransition(nextLastSubChild, parent, toId, opts, forceTransitionNone)
 					this.app.log(F+" calling _handleLayoutAndResizeCalls trans="+trans);
 					this._handleLayoutAndResizeCalls(nextSubViewArray, removeView, doResize, subIds, forceTransitionNone, trans);
 				}else{
@@ -458,7 +458,7 @@ define(["require", "dojo/_base/lang", "dojo/_base/declare", "dojo/has", "dojo/on
 							this.app.log(LOGKEY,F,"setting visibility visible for v.id=["+v.id+"]");
 							if(v.domNode){
 								this.app.log(LOGKEY,F,"  setting domStyle for removeView visibility visible for v.id=["+v.id+"], display=["+v.domNode.style.display+"]");
-								domStyle.set(v.domNode, "visibility", "visible");
+								this._setViewVisible(v, true);
 							}
 						}
 					}
@@ -577,13 +577,23 @@ define(["require", "dojo/_base/lang", "dojo/_base/declare", "dojo/has", "dojo/on
 		_showSelectedChildren: function(w){
 			var F = MODULE+":_showSelectedChildren";
 			this.app.log(LOGKEY,F," setting domStyle visibility visible for w.id=["+w.id+"], display=["+w.domNode.style.display+"], visibility=["+w.domNode.style.visibility+"]");
-			domStyle.set(w.domNode, "visibility", "visible");
+			this._setViewVisible(w, true);
 			w._needsResize = false;
 			for(var hash in w.selectedChildren){	// need this to handle all selectedChildren
 				if(w.selectedChildren[hash] && w.selectedChildren[hash].domNode){
 					this.app.log(LOGKEY,F," calling _showSelectedChildren for w.selectedChildren[hash].id="+w.selectedChildren[hash].id);
 					this._showSelectedChildren(w.selectedChildren[hash]);
 				}
+			}
+		},
+
+		_setViewVisible: function(v, visible){
+			if(visible){
+				domStyle.set(v.domNode, "visibility", "visible");
+			//	domStyle.set(v.domNode, "opacity", 1);
+			}else{
+				domStyle.set(v.domNode, "visibility", "hidden");
+			//	domStyle.set(v.domNode, "opacity", 0);
 			}
 		},
 
